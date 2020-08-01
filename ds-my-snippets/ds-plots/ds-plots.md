@@ -12,9 +12,10 @@ https://github.com/rafanthx13/ds-portifolio/blob/master/ds-my-snippets/ds-plots/
 ## `eda_generate_categorical_feat`
 
 ````python
-def eda_categ_feat_desc_plot(series_categorical):
+def eda_categ_feat_desc_plot(series_categorical, title = ""):
     """Generate 2 plots: barplot with quantity and pieplot with percentage. 
        @series_categorical: categorical series
+       @title: optional
     """
     series_name = series_categorical.name
     val_counts = series_categorical.value_counts()
@@ -25,7 +26,10 @@ def eda_categ_feat_desc_plot(series_categorical):
     val_concat.reset_index(level=0, inplace=True)
     val_concat = val_concat.rename( columns = {'index': series_name} )
     
-    fig, ax = plt.subplots(figsize = (17,5), ncols=2, nrows=1) # figsize = (width, height)
+    fig, ax = plt.subplots(figsize = (12,4), ncols=2, nrows=1) # figsize = (width, height)
+    if(title != ""):
+        fig.suptitle(title, fontsize=18)
+        fig.subplots_adjust(top=0.8)
 
     s = sns.barplot(x=series_name, y='quantity', data=val_concat, ax=ax[0])
     for index, row in val_concat.iterrows():
@@ -220,3 +224,56 @@ def eda_bokeh_horiz_bar_ranked(df, column_target, title = '', int_top = 3, secon
 ```
 
 ![](https://github.com/rafanthx13/ds-portifolio/blob/master/ds-my-snippets/ds-plots/imgs/eda_bokeh_horiz_bar_ranked.png)
+
+## Plot eda State with rank (inclusive creation of GeoJSONSoruce)
+
+```python
+def eda_foward_2_plots(my_df, primary_column, target_column, first_title, second_title, int_top = 8, location_column = 'District'):
+    """
+    Execute and show all together:
+    @ primary_columns must to be a float to join to make a GeoSource
+    generate_GeoJSONSource_to_districts()
+    eda_seoul_districts_geo_plot()
+    eda_bokeh_horiz_bar_ranked()
+    """
+    my_df = my_df.rename({primary_column: target_column}, axis = 1)
+
+    geo_source = generate_GeoJSONSource_to_districts(my_df, target_column)
+
+    geo = eda_seoul_districts_geo_plot(geo_source, my_df, first_title,
+                                       target_column, location_column, palette = inferno(32))
+
+    rank = eda_bokeh_horiz_bar_ranked(my_df, target_column, second_title,
+                                      int_top = int_top, second_target = location_column)
+
+    show( row( geo, rank ))
+```
+
+
+
+## Generate ManyBoxPlot with seaborn
+
+```python
+f, ((ax1, ax2, ax3), (ax4, ax5, ax6)) = plt.subplots(ncols=3, nrows=2, figsize=(15, 7), sharex=False)
+
+map_feat_ax = {'SO2': ax1, 'NO2': ax2, 'O3': ax3, 'CO': ax4, 'PM10': ax5, 'PM2.5': ax6}
+
+for key, value in map_feat_ax.items():
+    sns.boxplot(x=df[key], ax=value)
+    
+plt.show()
+```
+
+## Generate Many `describe()` to some columns
+
+```python
+gas_list = list(map_feat_ax.keys())
+
+list_describes = []
+for f in gas_list:
+    list_describes.append(df[f].describe())
+
+df_describe_gas1 = pd.concat(list_describes, axis = 1)
+df_describe_gas1  
+```
+
