@@ -5,6 +5,7 @@
 **Introduction**
 + `df.info()`
   - Descobrir o tamanho em memória, linhas, colunas e tipos dessas colunas
++ `df.describe()`
 + Renomear features para ao formato snake_case (tudo minusculo e em ingles)
 + Entender cada Feature (gerar md com seus nomes e descrição)
 + Lidar com missing values
@@ -21,6 +22,8 @@ msno.matrix(df)
 msno.bar(df)
 # correlation between null values
 msno.heatmap(df)
+# count nan rows
+df.isnull().sum().max()
 ````
 
 + Saber a quantidade de missign value
