@@ -19,4 +19,8 @@
 
 + **[Tiroteios com mortes causadas por policias nos Estados Unidos](https://www.kaggle.com/rafanthx13/us-police-shooting-eda-with-maps-visualisation)**:Análise Exploratória de dados sobre morte causadas por policiais americanos jundamente com o census demográfico de 2017 para buscar se existe correlação com raça e onde essa correlaçâo é maior ou menor.
 
+### Classificação
+
++ **[Classificar Fraude ou não em Cartões de Crédito](https://www.kaggle.com/rafanthx13/credit-card-fraud-classify-on-unbalanced-data)**: Classificação de registros num DataSet desbalanceado; Investigação de técnicas para tratar datasets desbalanceados: Random UnderSampling e SMOTE OverSampling.
+
 <h2 align="center">Feito por 🚀<a href="https://rafanthx13.github.io/">Rafael Morais de Assis</a></h2>
