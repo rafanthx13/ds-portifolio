@@ -23,4 +23,6 @@
 
 + **[Classificar Fraude ou não em Cartões de Crédito](https://www.kaggle.com/rafanthx13/credit-card-fraud-classify-on-unbalanced-data)**: Classificação de registros num DataSet desbalanceado; Investigação de técnicas para tratar datasets desbalanceados: Random UnderSampling e SMOTE OverSampling.
 
++ **[Lista de Passageiros do Desatre do Navio da Estonia: Classificar sobrevivência ou não a catastrofe](https://www.kaggle.com/rafanthx13/estonia-disaster-eda-and-classify)**: Classificaçâo de registros de uma lsita de passageiros se sobrevivem ou não.
+
 <h2 align="center">Feito por 🚀<a href="https://rafanthx13.github.io/">Rafael Morais de Assis</a></h2>

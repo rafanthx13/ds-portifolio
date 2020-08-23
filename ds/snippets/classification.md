@@ -112,6 +112,10 @@ from sklearn.ensemble import BaggingClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import ExtraTreesClassifier
 
+# Others Linear Classifiers
+from sklearn.linear_model import SGDClassifier, RidgeClassifier
+from sklearn.linear_model import Perceptron, PassiveAggressiveClassifier
+
 # xboost
 from xgboost import XGBClassifier
 from lightgbm import LGBMClassifier
@@ -121,20 +125,28 @@ from sklearn.model_selection import cross_val_score
 from sklearn.metrics import f1_score
 from sklearn.metrics import accuracy_score
 
-import time
-import operator
-
-time_start = time.time()
-
 # neural net of sklearn
 from sklearn.neural_network import MLPClassifier
+
+# others
+import time
+import operator
 
 # def neural nets
 mlp = MLPClassifier(verbose = False, max_iter=1000, tol = 0.000010,
                     solver = 'adam', hidden_layer_sizes=(100), activation='relu')
 
+# def classifiers
+
 nn_classifiers = {
     "Multi Layer Perceptron": mlp
+}
+
+linear_classifiers = {
+    "SGDC": SGDClassifier(),
+    "Ridge": RidgeClassifier(),
+    "Perceptron": Perceptron(),
+    "PassiveAggressive": PassiveAggressiveClassifier()
 }
 
 gboost_classifiers = {
@@ -162,7 +174,8 @@ all_classifiers = {
     "Simple Models": classifiers,
     "Ensemble Models": ensemble_classifiers,
     "GBoost Models": gboost_classifiers,
-    "NeuralNet Models": nn_classifiers
+    "NeuralNet Models": nn_classifiers,
+    "Others Linear Models": linear_classifiers,
 }
 
 metrics = {
@@ -175,6 +188,8 @@ format_float = "{:.4f}"
 
 is_print = False # True/False
 
+time_start = time.time()
+
 print("Fit Many Classifiers")
 
 for key, classifiers in all_classifiers.items():
@@ -183,14 +198,14 @@ for key, classifiers in all_classifiers.items():
     for key, classifier in classifiers.items():
         t0 = time.time()
         # xsm_train, ysm_train || x_train, y_train
-        classifier.fit(xsm_train, ysm_train) 
+        classifier.fit(x_train, y_train) 
         t1 = time.time()
         # xsm_train, ysm_train || x_train, y_train
-        training_score = cross_val_score(classifier, xsm_train, ysm_train, cv=5) 
+        training_score = cross_val_score(classifier, x_train, y_train, cv=5) 
+        y_pred = classifier.predict(x_test)
         cv_score = round(training_score.mean(), 4) * 100
         acc_score = accuracy_score(y_test, y_pred)
         f1_mean_score = f1_score(y_test, y_pred, average="macro") # average =  'macro' or 'weighted'
-        y_pred = classifier.predict(x_test)
         if (is_print):
             print(key, "\n\tHas a training score of", 
                   cv_score, "% accuracy score on CrossVal with 5 cv ")
@@ -221,7 +236,7 @@ df_metrics = pd.DataFrame(lists , columns = a_columns,
                     index = ['cv_scores', 'acc_scores', 'f1_scores'] )
 ```
 
-**Generate DataFram with Scores**
+**Generate DataFrame with Scores**
 
 ```python
 lists = [list(metrics['cv_scores'].values()),
@@ -231,10 +246,11 @@ lists = [list(metrics['cv_scores'].values()),
 
 a_columns = list(metrics['cv_scores'].keys())
 
-dfre = pd.DataFrame(lists , columns = a_columns,
+dfre1 = pd.DataFrame(lists , columns = a_columns,
                     index = ['cv_scores', 'acc_scores', 'f1_scores'] )
 
-dfre.T.sort_values(by="acc_scores", ascending=False)
+dfre1 = dfre1.T.sort_values(by="acc_scores", ascending=False)
+dfre1
 ```
 
 ## Unbalanced DataSet
@@ -283,4 +299,33 @@ df_post_pred = pd.DataFrame(
 df_error = df_post_pred.query("Y_Target != Y_Pred")
 df_error
 ```
+
+## Classification Report with ConfMatrix
+
+````python
+def class_report(y_target, y_preds, name="", labels=None):
+    if(name != ''):
+        print(name,"\n")
+    print(confusion_matrix(y_test, y_pred))
+    print(classification_report(y_test, y_pred, target_names=labels))
+````
+
+## Save and Load Models
+
+Even in kaggle directorys
+
+````python
+import pickle
+Pkl_Filename = "Pickle_Model.pkl"
+
+# Save the Modle to file in the current working directory
+with open(Pkl_Filename, 'wb') as file:
+    pickle.dump(ensemble, file)
+    
+# Load the Model back from file
+with open(Pkl_Filename, 'rb') as file:
+    Pickled_ensemble = pickle.load(file)
+
+Pickled_ensemble
+````
 

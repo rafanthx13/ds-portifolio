@@ -47,9 +47,28 @@ Last updated: 2020-08-14; (14/08/2020)
 
 ## Ter em cada subtitulo
 
++ [Import Libs and DataSet](#index01) 
++ [Snippets](#index02)
++ [EDA](#index03)
+  - [Check Missing Data](#index04)
+  - [Check Duplicate Data](#index05)
+  - [Each Feature Individually](#index06)
+  - [With Survived](#index07)
++ [Correlation](#index11)
++ [Unbalanced DataSet](#index09)
++ [Pre-Processing](#index23)
++ [Split in Train Test a Unbalanced DataSet](#index24)
++ [Test various ways to correct unbalanced dataset](#index25)
++ [Fit multiple models and Compare](#index26)
++ [Best Individual Model: AdaBoost](#index27)
++ [Super Leaner (MLens)](#index28)
++ [Save and Load a Model](#index29)
++ [Conclusion](#index30)
+
+
 <a id="top"></a>
 
-<a href="#top" class="btn btn-primary btn-sm" role="button" aria-pressed="true" style="color:white; margin-left: 20px;" data-toggle="popover">Go to TOC</a>
+<a id='index02'></a> <a href="#top" class="btn btn-primary btn-sm" role="button" aria-pressed="true" style="color:white; margin-left: 20px;" data-toggle="popover">Go to TOC</a>
 
 <span style='font-size: 15pt'>Analyse dangerous measurements of each pollutant</span>
 
