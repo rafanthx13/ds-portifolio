@@ -208,7 +208,7 @@ def eda_bokeh_horiz_bar_ranked(df, column_target, title = '', int_top = 3, secon
     p.xaxis.axis_label = "value of '" + column_target + "'"
 
     hover = HoverTool()  # initiate hover tool
-    hover.tooltips = [("Value","R$ @{" + column_target + "}" ),   
+    hover.tooltips = [("Value","R$ @{" + column_target + "}" ),
                        ("Ranking","@index°")]
 
     hover.mode = 'hline' # set the mode of the hover tool

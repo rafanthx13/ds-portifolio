@@ -51,8 +51,6 @@ Last updated: 2020-08-14; (14/08/2020)
 
 <a href="#top" class="btn btn-primary btn-sm" role="button" aria-pressed="true" style="color:white; margin-left: 20px;" data-toggle="popover">Go to TOC</a>
 
-<a href="#top" class="btn btn-primary btn-sm" role="button" aria-pressed="true" style="color:white; margin-left: 20px;" data-toggle="popover">Go to TOC</a>
-
 <span style='font-size: 15pt'>Analyse dangerous measurements of each pollutant</span>
 
 ## Summary of the data
@@ -116,4 +114,25 @@ Até aqui não há grandes problemas, mas a confusão pode ser bem grande quando
 
 About 1.2 million people live in crowded refugee camps in the West Bank, Gaza and countries that neighbor Israel. (CNN)
 Cerca de 1,2 milhão de pessoas vivem em campos de refugiados superlotados na Cisjordânia, em Gaza e em países vizinhos de Israel.
+
+## INTRO
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+import warnings
+warnings.filterwarnings("ignore")
+
+import os
+for dirname, _, filenames in os.walk('/kaggle/input'):
+    for filename in filenames:
+        print(os.path.join(dirname, filename))
+        
+pd.options.display.float_format = '{:,.4f}'.format
+
+df = pd.read_csv("/kaggle/input/passenger-list-for-the-estonia-ferry-disaster/estonia-passenger-list.csv")
+print("Shape of DataSet:", df.shape[0], 'rows |', df.shape[1], 'columns')
+df.head()
 

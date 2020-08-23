@@ -1,5 +1,12 @@
 # DS PLOTS
 
+## Plletas do Seaborn
+
+```
+palette="Set3"
+palette="husl"
+```
+
 ## Como documentar
 
 ```python
