@@ -25,4 +25,8 @@
 
 + **[Lista de Passageiros do Desatre do Navio da Estonia: Classificar sobrevivência ou não a catastrofe](https://www.kaggle.com/rafanthx13/estonia-disaster-eda-and-classify)**: Classificaçâo de registros de uma lsita de passageiros se sobrevivem ou não.
 
+### Regressão
+
++ **[Prever Preço de Casa](https://www.kaggle.com/rafanthx13/house-prices-eda-and-regression)**: Atividade de Regressão, com base em cerca de 80 características de uma casa, prever o seu valor de venda.
+
 <h2 align="center">Feito por 🚀<a href="https://rafanthx13.github.io/">Rafael Morais de Assis</a></h2>

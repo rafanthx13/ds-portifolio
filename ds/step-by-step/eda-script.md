@@ -16,6 +16,7 @@
 [link](https://dev.to/tomoyukiaota/visualizing-the-patterns-of-missing-value-occurrence-with-python-46dj)
 
 ````python
+sns.heatmap(df.isnull(), cbar=False)
 import missingno as msno
 # matrix: more easy see missign data in rows
 msno.matrix(df)
@@ -32,6 +33,10 @@ df.isnull().sum().max()
   - len(Series) - Series.count()
 + replace missing values
   - df['feat'].fillna(df['feat'].median(), inplace = True)
+
+**REmover certas linhas especificas**
+# Remove outliers
+df_train.drop(df_train[(df_train['OverallQual']<5) & (df_train['SalePrice']>200000)].index, inplace=True)
 
 **EM PROBLEMAS DE CLASSIFICAÇÂO, É BOM FICAR LIGADO NO DESBALANCEAMENTO: Se for, a divisâo da base entre treino e testse também deve está balanceado**
 

@@ -25,6 +25,9 @@ sns.set(style="whitegrid") # Com grid mas fundo branco
 
 Isso vai mudar tambem os plot do matplot lib
 
+color = sns.color_palette()
+sns.set_style('darkgrid')
+
 ```
 
 # Categorical Feat
@@ -349,45 +352,6 @@ df_describe_gas1
 
 ![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/g_many_describes.png)
 
-## HeatMap seaborn correlation
-
-```python
-f, ax = plt.subplots(figsize=(16,10))
-
-sub_sample_corr = new_df.corr()
-
-mask = np.zeros_like(sub_sample_corr)
-mask[np.triu_indices_from(mask)] = True
-
-sns.heatmap(sub_sample_corr, cmap='coolwarm_r', annot_kws={'size':20}, ax=ax, mask=mask)
-ax.set_title('SubSample Correlation Matrix \n (use for reference)', fontsize=14)
-plt.show()
-```
-
-![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/heat-map-correlation.png)
-
-## Ranking Correlations seaborn
-
-```python
-# Generate Ranking of correlations (boht positives, negatives)
-
-corr = new_df.corr().abs() # Show greater correlations both negative and positive
-dict_to_rename = {0: "value", "level_0": "feat1", "level_1": "feat2"} # Rename DataFrame
-s = corr.unstack().reset_index().rename(dict_to_rename, axis = 1) # Restructure dataframe
-
-# remove rows thas like 'x' | 'x' 
-s_to_drop = s[(s['feat1'] == s['feat2'])].index 
-s = s.drop(s_to_drop).reset_index()
-
-s = s.sort_values(by="value", ascending=False).drop("index", axis=1) # sort
-
-# remove rows like "x1 , x2 = y", "x2 , x1 = y". Duplicate cuz is inverted feats
-s = s.drop_duplicates('value') 
-s[:10]
-```
-
-![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/ranking-correlation.png)
-
 
 
 # Numerical Feat
@@ -575,3 +539,201 @@ plot_confusion_matrix(confusion_mtx, labels, title="Random UnderSample \n Confus
 
 Apesar disso, é preferível so o report mesmo que informa o f1, pois com ele conseguimos avaliar melhor classifiacções desbalanceadas.
 
+# CORRELATION
+
+### HeatMap seaborn correlation
+
+```python
+f, ax = plt.subplots(figsize=(16,10))
+
+sub_sample_corr = new_df.corr()
+
+mask = np.zeros_like(sub_sample_corr)
+mask[np.triu_indices_from(mask)] = True
+
+sns.heatmap(sub_sample_corr, cmap='coolwarm_r', annot_kws={'size':20}, ax=ax, mask=mask)
+ax.set_title('SubSample Correlation Matrix \n (use for reference)', fontsize=14)
+plt.show()
+```
+
+![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/heat-map-correlation.png)
+
+### Ranking Correlations seaborn
+
+```python
+# Generate Ranking of correlations (boht positives, negatives)
+
+corr = new_df.corr().abs() # Show greater correlations both negative and positive
+dict_to_rename = {0: "value", "level_0": "feat1", "level_1": "feat2"} # Rename DataFrame
+s = corr.unstack().reset_index().rename(dict_to_rename, axis = 1) # Restructure dataframe
+
+# remove rows thas like 'x' | 'x' 
+s_to_drop = s[(s['feat1'] == s['feat2'])].index 
+s = s.drop(s_to_drop).reset_index()
+
+s = s.sort_values(by="value", ascending=False).drop("index", axis=1) # sort
+
+# remove rows like "x1 , x2 = y", "x2 , x1 = y". Duplicate cuz is inverted feats
+s = s.drop_duplicates('value') 
+s[:10]
+```
+
+![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/ranking-correlation.png)
+
+### Top and Bottom Correlation to target_column
+
+```python
+def plot_top_rank_correlation(my_df, column_target, top_rank=5):
+    corr_matrix = my_df.corr()
+    f, (ax1, ax2) = plt.subplots(ncols=2, figsize=(18, 6), sharex=False)
+
+    ax1.set_title('Top {} Positive Corr to {}'.format(top_rank, column_target))
+    ax2.set_title('Top {} Negative Corr to {}'.format(top_rank, column_target))
+    
+    cols_top = corrmat.nlargest(top_rank+1, column_target)[column_target].index
+    cm = np.corrcoef(my_df[cols_top].values.T)
+    mask = np.zeros_like(cm)
+    mask[np.triu_indices_from(mask)] = True
+    hm = sns.heatmap(cm, cbar=True, annot=True, square=True, fmt='.2f',
+                     annot_kws={'size': 8}, yticklabels=cols.values,
+                     xticklabels=cols.values, mask=mask, ax=ax1)
+    
+    cols_bot = corrmat.nsmallest(top_rank, column_target)[column_target].index
+    cols_bot  = cols_bot.insert(0, column_target)
+    print(cols_bot)
+    cm = np.corrcoef(my_df[cols_bot].values.T)
+    mask = np.zeros_like(cm)
+    mask[np.triu_indices_from(mask)] = True
+    hm = sns.heatmap(cm, cbar=True, annot=True, square=True, fmt='.2f',
+                     annot_kws={'size': 8}, yticklabels=cols.values,
+                     xticklabels=cols.values, mask=mask, ax=ax2)
+    
+    plt.show()
+```
+
+![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/plot_top_rank_correlation.png)
+
+# NORMAL DISTRIBUTION
+
+### Test Normality: Skewness and Kutoise
+
+```python
+def test_normal_distribution(serie, series_name='series', thershold=0.4):
+    f, (ax1, ax2) = plt.subplots(ncols=2, figsize=(18, 6), sharex=False)
+    f.suptitle('{} is a Normal Distribution?'.format(series_name), fontsize=18)
+    ax1.set_title("Histogram to " + series_name)
+    ax2.set_title("Q-Q-Plot to "+ series_name)
+    
+    # calculate normal distrib. to series
+    mu, sigma = norm.fit(serie)
+    print('Normal dist. (mu= {:,.2f} and sigma= {:,.2f} )'.format(mu, sigma))
+    
+    # skewness and kurtoise
+    skewness = serie.skew()
+    kurtoise = serie.kurt()
+    print("Skewness: {:,.2f} | Kurtosis: {:,.2f}".format(skewness, kurtoise))
+    # evaluate skeness
+    # If skewness is less than −1 or greater than +1, the distribution is highly skewed.
+    # If skewness is between −1 and −½ or between +½ and +1, the distribution is moderately skewed.
+    # If skewness is between −½ and +½, the distribution is approximately symmetric.
+    pre_text = '\t=> '
+    if(skewness < 0):
+        text = pre_text + 'negatively skewed or left-skewed'
+    else:
+        text =  pre_text + 'positively skewed or right-skewed\n'
+        text += pre_text + 'in case of positive skewness, log transformations usually works well.\n'
+        text += pre_text + 'np.log(), np.log1(), boxcox1p()'
+    if(skewness < -1 or skewness > 1):
+        print("Evaluate skewness: highly skewed")
+        print(text)
+    if( (skewness <= -0.5 and skewness > -1) or (skewness >= 0.5 and skewness < 1)):
+        print("Evaluate skewness: moderately skewed")
+        print(text)
+    if(skewness >= -0.5 and skewness <= 0.5):
+        print('Evaluate skewness: approximately symmetric')
+    # evaluate kurtoise
+    #     Mesokurtic (Kurtoise next 3): This distribution has kurtosis statistic similar to that of the normal distribution.
+    #         It means that the extreme values of the distribution are similar to that of a normal distribution characteristic. 
+    #         This definition is used so that the standard normal distribution has a kurtosis of three.
+    #     Leptokurtic (Kurtosis > 3): Distribution is longer, tails are fatter. 
+    #         Peak is higher and sharper than Mesokurtic, which means that data are heavy-tailed or profusion of outliers.
+    #         Outliers stretch the horizontal axis of the histogram graph, which makes the bulk of the data appear in a 
+    #         narrow (“skinny”) vertical range, thereby giving the “skinniness” of a leptokurtic distribution.
+    #     Platykurtic: (Kurtosis < 3): Distribution is shorter, tails are thinner than the normal distribution. The peak
+    #         is lower and broader than Mesokurtic, which means that data are light-tailed or lack of outliers.
+    #         The reason for this is because the extreme values are less than that of the normal distribution.
+    print('evaluate kurtoise')
+    if(kurtoise > 3 + thershold):
+        print(pre_text + 'Leptokurtic: anormal: Peak is higher')
+    elif(kurtoise < 3 - thershold):
+        print(pre_text + 'Platykurtic: anormal: The peak is lower')
+    else:
+        print(pre_text + 'Mesokurtic: normal: the peack is normal')
+    
+    # shapiro-wilki test normality
+    # If the P-Value of the Shapiro Wilk Test is larger than 0.05, we assume a normal distribution
+    # If the P-Value of the Shapiro Wilk Test is smaller than 0.05, we do not assume a normal distribution
+    #     print("Shapiro-Wiki Test: Is Normal Distribution? {}".format(stats.shapiro(serie)[1] < 0.01) )
+    #     print(stats.shapiro(serie))
+
+    
+    # ax1 = histogram
+    sns.distplot(serie , fit=norm, ax=ax1)
+    ax1.legend(['Normal dist. ($\mu=$ {:,.2f} and $\sigma=$ {:,.2f} )'.format(mu, sigma)],
+            loc='best')
+    ax1.set_ylabel('Frequency')
+    # ax2 = qq-plot
+    stats.probplot(df_train['SalePrice'], plot=ax2)
+    plt.show()
+```
+
+![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/test_normal_distribution.png)
+
+# MISSING DATA
+
+## DF Top missing columns
+
+```python
+def df_rating_missing_data(my_df):
+    """Create DataFrame with Missing Rate
+    """
+    all_data_nan = (my_df.isnull().sum() / len(my_df)) * 100
+    all_data_nan = all_data_nan.drop(all_data_nan[all_data_nan == 0].index).sort_values(ascending=False)[:30]
+    return pd.DataFrame({'Missing Ratio' :all_data_nan})  
+```
+
+![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/df_rating_missing_data.png)
+
+# REGRESSION
+
+## Plot pointPlot Regression scores
+
+```python
+def plot_model_score_regression(models_name_list, model_score_list, title=''):
+    fig = plt.figure(figsize=(15, 10))
+    ax = sns.pointplot( x = models_name_list, y = model_score_list, 
+        markers=['o'], linestyles=['-'])
+    for i, score in enumerate(model_score_list):
+        print(i, score)
+        ax.text(i, score + 0.002, '{:.6f}'.format(score),
+                horizontalalignment='left', size='large', 
+                color='black', weight='semibold')
+    plt.ylabel('Score', size=20, labelpad=12.5)
+    plt.xlabel('Model', size=20, labelpad=12.5)
+    plt.tick_params(axis='x', labelsize=13.5)
+    plt.tick_params(axis='y', labelsize=12.5)
+
+    plt.title(title, size=20)
+
+    plt.show()
+
+# Where
+# scores = { 
+#  'LightGB': [0.12171382770542649],
+#  'XGBoost': [0.14205060003245637],
+# }
+    
+plot_model_score_regression(list(scores.keys()), [score for score, _ in scores.values()])
+```
+
+![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/plot_model_score_regression.png)

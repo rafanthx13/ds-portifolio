@@ -1,3 +1,9 @@
+
+
+
+
+=======================================================================
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -24,13 +30,21 @@ plt.style.use('seaborn')
 seed = 42
 np.random.seed(seed)
 
-"""
+=======================================================================
 
-```
-palette="Set3"
-palette="husl"
-```
+file_path = '/kaggle/input/electric-motor-temperature/pmsm_temperature_data.csv'
+df = pd.read_csv(file_path)
+print("DataSet = {} rows and {} columns".format(df.shape[0], df.shape[1]))
+print("Columns:", df.columns.tolist())
+df.head()
 
-"""
+=======================================================================
 
+quantitative = [f for f in df_train.columns if df_train.dtypes[f] != 'object']
+quantitative.remove('SalePrice')
+quantitative.remove('Id')
+qualitative = [f for f in df_train.columns if df_train.dtypes[f] == 'object']
+print("Qualitative Variables: (Numerics)", "\n\n=>", qualitative,
+      "\n\nQuantitative Variable: (Strings)\n=>", quantitative)
 
+=======================================================================

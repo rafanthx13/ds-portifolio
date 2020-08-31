@@ -5,7 +5,11 @@
 + Titulo
   - date created, last update, languages, author
 + Kaggle Descripiton
-+ Brief Summary (data-length)
++ Abstract
+  - Para ser mais entendível é necessário, eu achei, ter um asbtract como o de um artigo. Ele terá: descriçâo do dataset, o significado de cada linha (nao é features, é row mesmo). O que foivisto, como foi resolvido, métrico, cuirosidesde do processo e por fim a pontuaçâo final e como foi feita
++ Brief Summary (data-length) of dataset
+  - em formato de tabela markdown
+  - Se for muito grande, nao colocar
 + TableOfContent
 
 ---
@@ -49,22 +53,26 @@ Last updated: 2020-08-14; (14/08/2020)
 
 + [Import Libs and DataSet](#index01) 
 + [Snippets](#index02)
-+ [EDA](#index03)
-  - [Check Missing Data](#index04)
-  - [Check Duplicate Data](#index05)
-  - [Each Feature Individually](#index06)
-  - [With Survived](#index07)
-+ [Correlation](#index11)
-+ [Unbalanced DataSet](#index09)
-+ [Pre-Processing](#index23)
-+ [Split in Train Test a Unbalanced DataSet](#index24)
-+ [Test various ways to correct unbalanced dataset](#index25)
-+ [Fit multiple models and Compare](#index26)
-+ [Best Individual Model: AdaBoost](#index27)
-+ [Super Leaner (MLens)](#index28)
-+ [Save and Load a Model](#index29)
-+ [Conclusion](#index30)
-
++ [EDA on 'SalePrice': the target to be predicted](#index03)
+  - [Top Correlation with 'SalePrice'](#index04)
+  - [Outiliers to 'SalePrice' to top corr features](#index05)
+  - [Remove Outiliers](#index06)
+  - [See 'SalePrice' as normal distribution](#index07)
+  - [Transform 'SalePrice' in a 'correct' normal distribution](#index08)
++ [Data Cleaning](#index09)
+  - [Join Train and Test Datasets to cleaning](#index10)
+  - [Missing Data](#index11)
+  - [Fix skewness in features to be normal distributions](#index12)
++ [Feature engineering](#index13)
+  - [Create New Features](#index14)
+  - [Encoded Categorical Features](#index15)
++ [Recreate Train nad Test DataSets](#index16)
++ [Developing models](#index17)
+  - [Evaluate models with CrossValidation](#index18)
+  - [Fit Models](#index19)
+  - [Join Models in Blend Model](#index32)
+  - [Find Best Model](#index33)
++ [Submit Prediction](#index20)
 
 <a id="top"></a>
 
@@ -154,4 +162,31 @@ pd.options.display.float_format = '{:,.4f}'.format
 df = pd.read_csv("/kaggle/input/passenger-list-for-the-estonia-ferry-disaster/estonia-passenger-list.csv")
 print("Shape of DataSet:", df.shape[0], 'rows |', df.shape[1], 'columns')
 df.head()
+
+
+
+
+ambient
+
+Ambient temperature as measured by a thermal sensor located closely to the stator.
+
+Coolant temperature. The motor is water cooled. Measurement is taken at outflow.
+
+
+Voltage d-component
+
+Voltage q-component
+
+Motor speed
+
+Torque induced by current.
+
+Current d-component
+
+pm
+
+
+
+stator_yoke
+
 
