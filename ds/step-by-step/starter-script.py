@@ -1,6 +1,4 @@
-
-
-
+STARTER SCRIPT
 
 =======================================================================
 
@@ -24,6 +22,9 @@ for dirname, _, filenames in os.walk('/kaggle/input'):
 pd.options.display.float_format = '{:,.4f}'.format
 
 sns.set(style="whitegrid")
+
+plt.style.use('seaborn')
+sns.set_palette("Set3") # default seabon: deep || default matplotlib: tab10 || Set1, Set2, Set3, Paired, muted, Accent, Spectral, CMRmap # https://medium.com/@morganjonesartist/color-guide-to-seaborn-palettes-da849406d44f
 
 plt.style.use('seaborn')
 

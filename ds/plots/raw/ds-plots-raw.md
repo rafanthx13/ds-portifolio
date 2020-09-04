@@ -233,7 +233,7 @@ def eda_brazil_state_geo_plot(geosource, df_in, title, column, state_column, low
 
 ![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/geoplot-brazil-states.png)
 
-## `eda_bokeh_horiz_bar_ranked`
+## Bokeh Horizontal bar: top and bottom ranking int
 
 ```python
 from bokeh.palettes import Turbo256 
@@ -710,30 +710,40 @@ def df_rating_missing_data(my_df):
 
 ```python
 def plot_model_score_regression(models_name_list, model_score_list, title=''):
-    fig = plt.figure(figsize=(15, 10))
+    fig = plt.figure(figsize=(15, 6))
     ax = sns.pointplot( x = models_name_list, y = model_score_list, 
         markers=['o'], linestyles=['-'])
     for i, score in enumerate(model_score_list):
-        print(i, score)
-        ax.text(i, score + 0.002, '{:.6f}'.format(score),
+        ax.text(i, score + 0.002, '{:.4f}'.format(score),
                 horizontalalignment='left', size='large', 
                 color='black', weight='semibold')
-    plt.ylabel('Score', size=20, labelpad=12.5)
-    plt.xlabel('Model', size=20, labelpad=12.5)
-    plt.tick_params(axis='x', labelsize=13.5)
-    plt.tick_params(axis='y', labelsize=12.5)
-
+    plt.ylabel('Score', size=20, labelpad=12)
+    plt.xlabel('Model', size=20, labelpad=12)
+    plt.tick_params(axis='x', labelsize=12)
+    plt.tick_params(axis='y', labelsize=12)
+    plt.xticks(rotation=70)
     plt.title(title, size=20)
-
     plt.show()
-
-# Where
-# scores = { 
-#  'LightGB': [0.12171382770542649],
-#  'XGBoost': [0.14205060003245637],
-# }
     
 plot_model_score_regression(list(scores.keys()), [score for score, _ in scores.values()])
 ```
 
 ![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/plot_model_score_regression.png)
+
+## EDA Describe X by Y
+
+```python
+def describe_y_by_x_cat_boxplot(dtf, x_feat, y_target, title='', figsize=(15,5), rotatioon_degree=0):
+    """ Generate a quickly boxplot  to describe each Ŷ by each categorical value of x_feat
+    """
+    the_title = title if title != '' else '{} by {}'.format(y_target, x_feat)
+    fig, ax1 = plt.subplots(figsize = figsize)
+    sns.boxplot(x=x_feat, y=y_target, data=df_train, ax=ax1)
+    ax1.set_title(the_title, fontsize=18)
+    plt.xticks(rotation=rotatioon_degree) # recomend 70
+    plt.show()
+ # Example
+ # describe_y_by_x_boxplot(df_train, 'Name', 'Price', figsize=(20,8), rotatioon_degree=65)
+```
+
+![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/describe_y_by_x_cat_boxplot.png)

@@ -6,7 +6,7 @@
 from sklearn.model_selection import GridSearchCV, KFold, cross_val_score, train_test_split
 from sklearn.preprocessing import OneHotEncoder, LabelEncoder, StandardScaler, RobustScaler, scale
 from sklearn.decomposition import PCA
-from sklearn.linear_model import ElasticNet, Lasso, BayesianRidge, LassoLarsIC
+from sklearn.linear_model import ElasticNet, LassoCV, BayesianRidge, LassoLarsIC
 from sklearn.linear_model import Ridge, RidgeCV, ElasticNet, ElasticNetCV
 from sklearn.kernel_ridge import KernelRidge
 from mlxtend.regressor import StackingCVRegressor
@@ -69,6 +69,25 @@ xgboost = XGBRegressor(learning_rate=0.01,
 ridge_alphas = [1e-15, 1e-10, 1e-8, 9e-4, 7e-4, 5e-4, 3e-4, 1e-4, 1e-3, 5e-2, 1e-2, 0.1, 0.3, 1, 3, 5, 10, 15, 18, 20, 30, 50, 75, 100]
 ridge = make_pipeline(RobustScaler(), RidgeCV(alphas=ridge_alphas, cv=kf))
 
+# setup models    
+lasso_alphas2 = [5e-05, 0.0001, 0.0002, 0.0003, 0.0004, 0.0005, 0.0006, 0.0007, 0.0008]
+
+elastic_alphas = [0.0001, 0.0002, 0.0003, 0.0004, 0.0005, 0.0006, 0.0007]
+elastic_l1ratio = [0.8, 0.85, 0.9, 0.95, 0.99, 1]
+
+
+# Lasso Regressor
+lasso = make_pipeline(RobustScaler(),
+                      LassoCV(max_iter=1e7, alphas=lasso_alphas2,
+                              random_state=42, cv=kf))
+# Elastic Net Regressor
+elasticnet = make_pipeline(RobustScaler(),  
+                           ElasticNetCV(max_iter=1e7, alphas=elastic_alphas,
+                                        cv=kf, l1_ratio=elastic_l1ratio))
+
+# Kernel Ridge
+KRR = KernelRidge(alpha=0.6, kernel='polynomial', degree=2, coef0=2.5)
+
 # Support Vector Regressor
 svr = make_pipeline(RobustScaler(), SVR(C= 20, epsilon= 0.008, gamma=0.0003))
 
@@ -90,28 +109,28 @@ rf = RandomForestRegressor(n_estimators=1200,
                           max_features=None,
                           oob_score=True,
                           random_state=42)
-
-# Stack up all the models above, optimized using xgboost
-stack_gen = StackingCVRegressor(regressors = (xgboost, lightgbm, svr, ridge, gbr, rf),
-                                meta_regressor = xgboost,
-                                use_features_in_secondary=True)
 ```
 
 ```python
 regressor_models = {
-    'LightGB': lightgbm,
-    'XGBoost': xgboost,
-    'SVM_Regressor': svr,
-    'Ridge': ridge,
-    'RandomForest': rf,
-    'GradientBoosting': gbr,
-    'stack_gen': stack_gen
+    'LightGB': lightgbm, # 20s
+    'XGBoost': xgboost, # 340s = 5min 40s
+    'SVM_Regressor': svr, # 6s
+    'Ridge': ridge, # 6s
+    'RandomForest': rf, # 146s = 2min 20s
+    'GradientBoosting': gbr, # 93s = 1min 30s
+    # 'stack_gen': stack_gen, # Nâo tem como fazer, esse CV é para avaliar os outros, nao tem como aplicar o CV ao Stack
+    ## ADD++
+    'Lasso': lasso, # 15s
+    'KernelRidge': KRR, # 1.88s
+    'ElasticNet': elasticnet # 40s
 }
 
 scores = {}
 
 ## Cross Validation
 t_start = time.time()
+
 for model_name, model in regressor_models.items():
     print(model_name)
     t0 = time.time()
@@ -121,6 +140,7 @@ for model_name, model in regressor_models.items():
     scores[model_name] = [m,s]
     print('\t=> mean {:.5f}, std: {:.5f}'.format(m, s))
     print("\t=> took {:,.3f} s".format(t1 - t0))
+    
 t_ending = time.time()
 print('took', t_ending - t_start)
 ```
@@ -128,6 +148,12 @@ print('took', t_ending - t_start)
 ## Fit Many Regression Models with Time
 
 ```python
+# train a model and show the time
+# Def Stack Model: Stack up all the models above, optimized using  ['xgboost'/'elasticnet']
+stack_gen = StackingCVRegressor(regressors = (xgboost, lightgbm, svr, ridge, gbr, rf),
+                                meta_regressor = elasticnet,
+                                use_features_in_secondary=True)
+
 # train a model and show the time
 def fit_a_model(model, model_name):
     t0 = time.time()
@@ -149,5 +175,6 @@ elast_model = fit_a_model(elasticnet, 'ElasticNet') # 8s
 # more time
 rf_model    = fit_a_model(rf, 'RandomForest') # 51s
 xgb_model   = fit_a_model(xgboost, 'XGboost') # 116s = 2min
+stack_model = fit_a_model(stack_gen, 'Stack') # 1.087s = 18min
 ```
 

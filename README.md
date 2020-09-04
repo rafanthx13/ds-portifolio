@@ -29,4 +29,8 @@
 
 + **[Prever Preço de Casa](https://www.kaggle.com/rafanthx13/house-prices-eda-and-regression)**: Atividade de Regressão, com base em cerca de 80 características de uma casa, prever o seu valor de venda.
 
++ **[Prever Gastos médicos](https://www.kaggle.com/rafanthx13/user-cars-cost-eda-and-regression)**: Prever gastos médicos por pessoa a paritir de informaçêso como idade, imc (índice de massa corporal, fumante ou nâo e etc..
+
++ **[Prever Preço de carros usados](https://www.kaggle.com/rafanthx13/user-cars-cost-eda-and-regression)**
+
 <h2 align="center">Feito por 🚀<a href="https://rafanthx13.github.io/">Rafael Morais de Assis</a></h2>
