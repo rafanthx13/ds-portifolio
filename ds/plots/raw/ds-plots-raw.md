@@ -81,7 +81,7 @@ def eda_categ_feat_desc_df(series_categorical):
     series_name = series_categorical.name
     val_counts = series_categorical.value_counts()
     val_counts.name = 'quantity'
-    val_percentage = series_categorical.value_counts(normalize=True)
+    val_percentage = series_categorical.value_counts(normalize=True).apply(lambda x: '{:.2%}'.format(x))
     val_percentage.name = "percentage"
     val_concat = pd.concat([val_counts, val_percentage], axis = 1)
     val_concat.reset_index(level=0, inplace=True)
@@ -90,6 +90,20 @@ def eda_categ_feat_desc_df(series_categorical):
 ```
 
 ![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/eda_g_categorical_df.png)
+
+### Generate df Tranposted ranked
+
+```python
+def generate_columns_from_index(topnum):
+    adict = {}
+    for i in range(topnum):
+        adict[i] = 'top' + str(i+1) + '°'
+    return adict
+
+def eda_categ_feat_T_rankend(series, top_num):
+    return eda_categ_feat_desc_df(series).head(top_num).T.rename(generate_columns_from_index(top_num),axis='columns')
+    
+```
 
 
 
@@ -354,12 +368,72 @@ df_describe_gas1
 
 
 
+## Tree Map to categorical features
+
+```python
+import squarify 
+import matplotlib
+
+def tree_map_cat_feat(dfr, column, title='', threshold=1, figsize=(18, 6), alpha=.7):
+    """ Print treempa to categorical variables
+    Ex: tree_map_cat_feat(df, 'country', 'top countries in country', 200)
+    """
+    plt.figure(figsize=figsize)
+    df_series = dfr[column].value_counts()
+    df_mins = df_series[ df_series <= threshold ].sum()
+    df_series = df_series[ df_series > threshold ]
+    df_series['Others'] = df_mins
+    percentages = df_series / df_series.sum()
+    alist, mini, maxi = [], min(df_series), max(df_series)
+    for i in range(len(df_series)):
+        alist.append( df_series.index[i] + '\n{:.2%}'.format(percentages[i]) )
+    # https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html
+    cmap = matplotlib.cm.viridis # Blues, plasma, inferno. 
+    norm = matplotlib.colors.Normalize(vmin=mini, vmax=maxi)
+    colors = [cmap(norm(i)) for i in df_series]
+    squarify.plot(sizes=df_series.values, label=alist, color=colors, alpha=alpha)
+    plt.axis('off')
+    plt.title(title)
+    plt.show()
+```
+
+![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/tree_map_cat_feat.png)
+
 # Numerical Feat
+
+## Filter outiliers from a series
+
+REmove outiliers de uma serie, a saida é a serie sem outiliers. útil para fazer análise de feature, pois, se houver muitos outiliers vai atrapalhar os gráficos
+
+```python
+def series_remove_outiliers(series):
+    # Use IQR Strategy
+    # https://machinelearningmastery.com/how-to-use-statistics-to-identify-outliers-in-data/
+    # def quantils
+    q25, q75 = series.quantile(0.25), series.quantile(0.75)
+    iqr = q75 - q25
+    print('Percentiles: 25th=%.3f, 75th=%.3f, IQR=%.3f' % (q25, q75, iqr))
+    cut_off = iqr * 1.5
+    lower, upper = q25 - cut_off, q75 + cut_off
+    # identify outliers
+    print('Cut Off: below than', lower, 'and above than', upper)
+    outliers = series[ (series > upper) | (series < lower)]
+    print('Identified outliers: {:,d}'.format(len(outliers)), 'that are',
+          '{:.2%}'.format(len(outliers)/len(series)), 'of total data')
+    # remove outliers
+    outliers_removed = [x for x in series if x >= lower and x <= upper]
+    print('Non-outlier observations: {:,d}'.format(len(outliers_removed)))
+    series_no_outiliers = series[ (series <= upper) & (series >= lower) ]
+    return series_no_outiliers
+```
+
+
 
 ## describe, boxplot (with label) and distplot to numerical feat
 
 ```python
-def eda_numerical_feat(series, title="", with_label=True, number_format=""):
+def eda_numerical_feat(series, title="", with_label=True, number_format="", show_describe=False, size_labels=10):
+    # Use 'series_remove_outiliers' to filter outiliers
     """ Generate series.describe(), bosplot and displot to a series
     @with_label: show labels in boxplot
     @number_format: 
@@ -379,7 +453,8 @@ def eda_numerical_feat(series, title="", with_label=True, number_format=""):
         swap(ab, ',', '.')
     """
     f, (ax1, ax2) = plt.subplots(ncols=2, figsize=(18, 5), sharex=False)
-    print(series.describe())
+    if(show_describe):
+        print(series.describe())
     if(title != ""):
         f.suptitle(title, fontsize=18)
     sns.distplot(series, ax=ax1)
@@ -392,11 +467,11 @@ def eda_numerical_feat(series, title="", with_label=True, number_format=""):
         if(number_format != ""):
             for k, v in labels.items():
                 ax2.text(v, 0.3, k + "\n" + number_format.format(v), ha='center', va='center', fontweight='bold',
-                         size=8, color='white', bbox=dict(facecolor='#445A64'))
+                         size=size_labels, color='white', bbox=dict(facecolor='#445A64'))
         else:
             for k, v in labels.items():
                 ax2.text(v, 0.3, k + "\n" + str(v), ha='center', va='center', fontweight='bold',
-                     size=8, color='white', bbox=dict(facecolor='#445A64'))
+                     size=size_labels, color='white', bbox=dict(facecolor='#445A64'))
     plt.show()
 ```
 
@@ -689,6 +764,35 @@ def test_normal_distribution(serie, series_name='series', thershold=0.4):
 
 ![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/test_normal_distribution.png)
 
+# OUTILIERS
+
+Usando IQR retira as linhas que são outiliers de uma coluna. útil para fazer EDA se tiver muitos ouitliers
+
+```python
+def df_remove_outiliers_from_a_serie(mydf, series_name):
+    # Use IQR Strategy
+    # https://machinelearningmastery.com/how-to-use-statistics-to-identify-outliers-in-data/
+    # def quantils
+    series = mydf[series_name]
+    q25, q75 = series.quantile(0.25), series.quantile(0.75)
+    iqr = q75 - q25
+    print('Percentiles: 25th=%.3f, 75th=%.3f, IQR=%.3f' % (q25, q75, iqr))
+    cut_off = iqr * 1.5
+    lower, upper = q25 - cut_off, q75 + cut_off
+    # identify outliers
+    print('Cut Off: below than', lower, 'and above than', upper)
+    outliers = series[ (series > upper) | (series < lower)]
+    print('Identified outliers: {:,d}'.format(len(outliers)), 'that are',
+          '{:.2%}'.format(len(outliers)/len(series)), 'of total data')
+    # remove outliers
+    outliers_removed = [x for x in series if x >= lower and x <= upper]
+    print('Non-outlier observations: {:,d}'.format(len(outliers_removed)))
+    mydf = mydf[ (mydf[series_name] <= upper) & (mydf[series_name] >= lower) ]
+    return mydf
+```
+
+
+
 # MISSING DATA
 
 ## DF Top missing columns
@@ -697,14 +801,23 @@ def test_normal_distribution(serie, series_name='series', thershold=0.4):
 def df_rating_missing_data(my_df):
     """Create DataFrame with Missing Rate
     """
-    all_data_nan = (my_df.isnull().sum() / len(my_df)) * 100
-    all_data_nan = all_data_nan.drop(all_data_nan[all_data_nan == 0].index).sort_values(ascending=False)[:30]
-    return pd.DataFrame({'Missing Ratio' :all_data_nan})  
+    # get sum missing rows and filter has mising values
+    ms_sum = my_df.isnull().sum()
+    ms_sum = ms_sum.drop( ms_sum[ms_sum == 0].index )
+    # get percentage missing ratio and filter has mising values
+    ms_per = (my_df.isnull().sum() / len(my_df))
+    ms_per = ms_per.drop( ms_per[ms_per == 0].index)
+    # order by
+    ms_per = ms_per.sort_values(ascending=False)
+    ms_sum = ms_sum.sort_values(ascending=False)
+    # format percentage
+    ms_per = ms_per.apply(lambda x: '{:.3%}'.format(x))
+    return pd.DataFrame({'Missing Rate' : ms_per, 'Count Missing': ms_sum})  
 ```
 
 ![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/df_rating_missing_data.png)
 
-# REGRESSION
+# EVALUATE MODELS
 
 ## Plot pointPlot Regression scores
 
@@ -730,6 +843,8 @@ plot_model_score_regression(list(scores.keys()), [score for score, _ in scores.v
 
 ![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/plot_model_score_regression.png)
 
+# EDA
+
 ## EDA Describe X by Y
 
 ```python
@@ -740,10 +855,85 @@ def describe_y_by_x_cat_boxplot(dtf, x_feat, y_target, title='', figsize=(15,5),
     fig, ax1 = plt.subplots(figsize = figsize)
     sns.boxplot(x=x_feat, y=y_target, data=df_train, ax=ax1)
     ax1.set_title(the_title, fontsize=18)
-    plt.xticks(rotation=rotatioon_degree) # recomend 70
+    plt.xticks(rotation=rotatioon_degree) # recomend 70, rotate, rotation, degree
     plt.show()
  # Example
  # describe_y_by_x_boxplot(df_train, 'Name', 'Price', figsize=(20,8), rotatioon_degree=65)
 ```
 
 ![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/describe_y_by_x_cat_boxplot.png)
+
+# NLP
+
+## Words Distribution
+
+```python
+def plot_words_distribution(mydf, target_column, title='Words distribution', x_axis='Words in column'):
+    # adaptade of https://www.kaggle.com/alexcherniuk/imdb-review-word2vec-bilstm-99-acc
+    # def statistics
+    len_name = target_column+'_len'
+    mydf[len_name] = np.array(list(map(len, mydf[target_column])))
+    sw = mydf[len_name]
+    median = sw.median()
+    mean   = sw.mean()
+    mode   = sw.mode()[0]
+    # figure
+    fig, ax = plt.subplots()
+    sns.distplot(df['description_len'], bins=df['description_len'].max(),
+                hist_kws={"alpha": 0.9, "color": "blue"}, ax=ax,
+                kde_kws={"color": "black", 'linewidth': 3})
+    ax.set_xlim(left=0, right=np.percentile(df['description_len'], 95)) # Dont get outiliers
+    ax.set_xlabel(x_axis)
+    ymax = 0.014
+    plt.ylim(0, ymax)
+    # plot vertical lines for statistics
+    ax.plot([mode, mode], [0, ymax], '--', label=f'mode = {mode:.2f}', linewidth=4)
+    ax.plot([mean, mean], [0, ymax], '--', label=f'mean = {mean:.2f}', linewidth=4)
+    ax.plot([median, median], [0, ymax], '--',
+            label=f'median = {median:.2f}', linewidth=4)
+    ax.set_title(title, fontsize=20)
+    plt.legend()
+    plt.show()
+```
+
+![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/plot_words_distribution.png)
+
+## Top 1,2,3 Words
+
+```python
+def ngrams_plot(corpus,ngram_range,n=None):
+    """
+    List the top n words in a vocabulary according to occurrence in a text corpus.
+    """
+    vec = CountVectorizer(stop_words = 'english',ngram_range=ngram_range).fit(corpus)
+    bag_of_words = vec.transform(corpus)
+    sum_words = bag_of_words.sum(axis=0) 
+    words_freq = [(word, sum_words[0, idx]) for word, idx in vec.vocabulary_.items()]
+    words_freq =sorted(words_freq, key = lambda x: x[1], reverse=True)
+    total_list=words_freq[:n]
+    df=pd.DataFrame(total_list,columns=['text','count'])
+    return df
+
+# Generate
+df_1_grams = ngrams_plot(df['description'], (1,1), 10)
+df_2_grams = ngrams_plot(df['description'], (2,2), 10)
+df_3_grams = ngrams_plot(df['description'], (3,3), 10)
+
+
+# Plot
+fig, axes = plt.subplots(figsize = (18,4), ncols=3)
+fig.suptitle('Top 10 words')
+
+sns.barplot(y=df_1_grams['text'], x=df_1_grams['count'],ax=axes[0])
+axes[0].set_title("1 grams")
+
+sns.barplot(y=df_2_grams['text'], x=df_2_grams['count'],ax=axes[1])
+axes[1].set_title("2 grams",)
+
+sns.barplot(y=df_3_grams['text'], x=df_3_grams['count'],ax=axes[2])
+axes[2].set_title("3 grams")
+
+plt.show()
+```
+
+![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/ngrams_plot.png)

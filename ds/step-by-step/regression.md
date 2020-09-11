@@ -178,3 +178,26 @@ xgb_model   = fit_a_model(xgboost, 'XGboost') # 116s = 2min
 stack_model = fit_a_model(stack_gen, 'Stack') # 1.087s = 18min
 ```
 
+## Evaluate a regression model
+
+```python
+from sklearn.metrics import mean_absolute_error, mean_squared_error, mean_squared_log_error, r2_score
+
+def evaluate_regression(y_pred, y_test, title=''):
+    if(title):
+        print(title)
+    print('MAE : {:14,.3f}'.format(mean_absolute_error(y_pred, y_test)))
+    print('MSE : {:14,.3f}'.format(mean_squared_error(y_pred, y_test)))
+    print('RMSE: {:14,.3f}'.format(np.sqrt(mean_squared_error(y_pred, y_test))))
+    print('R2  : {:14,.3f}'.format(r2_score(y_pred, y_test)))
+
+# evaluate_regression(y_pred, y_test, 'Cat Regressor:')
+"""
+Cat Regressor:
+MAE :          1.740
+MSE :          4.875
+RMSE:          2.208
+R2  :          0.099
+"""
+```
+

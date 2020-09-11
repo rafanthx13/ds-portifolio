@@ -303,7 +303,12 @@ df_error
 ## Classification Report with ConfMatrix
 
 ````python
-def class_report(y_target, y_preds, name="", labels=None):
+
+from sklearn.metrics import confusion_matrix, classification_report
+
+this_labels = ['Under Average wines','Average wines','Good wines', 'Very Good wines', 'Excellent wines']
+
+def class_report(y_target, y_preds, name="", labels=this_labels):
     if(name != ''):
         print(name,"\n")
     print(confusion_matrix(y_test, y_pred))

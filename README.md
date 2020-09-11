@@ -33,4 +33,10 @@
 
 + **[Prever Preço de carros usados](https://www.kaggle.com/rafanthx13/user-cars-cost-eda-and-regression)**
 
+### Agrupamento
+
++ **[Agrupamentos de clientes de shopping](https://www.kaggle.com/rafanthx13/mall-customers-clustering)**
+
+
+
 <h2 align="center">Feito por 🚀<a href="https://rafanthx13.github.io/">Rafael Morais de Assis</a></h2>

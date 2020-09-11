@@ -33,16 +33,15 @@ Kaggle Kernel made by 🚀 <a href="https://www.kaggle.com/rafanthx13"> Rafael M
 \## Table Of Content (TOC) <a id="top"></a>
 ````
 
-## Libs and DataSet
+=======================================================================
 
-````python
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+
 import warnings
-import time
 warnings.filterwarnings("ignore")
 
 import os
@@ -50,16 +49,42 @@ for dirname, _, filenames in os.walk('/kaggle/input'):
     for filename in filenames:
         print(os.path.join(dirname, filename))
 
-\# Configs
-pd.options.display.float_format = '{:,.3f}'.format
+# Configs
+pd.options.display.float_format = '{:,.4f}'.format
+
 sns.set(style="whitegrid")
+
 plt.style.use('seaborn')
+sns.set_palette("Set3") # default seabon: deep || default matplotlib: tab10 || Set1, Set2, Set3, Paired, muted, Accent, Spectral, CMRmap # https://medium.com/@morganjonesartist/color-guide-to-seaborn-palettes-da849406d44f
+
+plt.style.use('seaborn')
+
 seed = 42
 np.random.seed(seed)
-````
 
-## 
+=======================================================================
 
+file_path = '/kaggle/input/wine-reviews/winemag-data_first150k.csv'
+df = pd.read_csv(file_path)
+print("DataSet = {:,d} rows and {} columns".format(df.shape[0], df.shape[1]))
+
+print("\nAll Columns:\n=>", df.columns.tolist())
+
+quantitative = [f for f in df.columns if df.dtypes[f] != 'object']
+qualitative = [f for f in df.columns if df.dtypes[f] == 'object']
+
+print("\nStrings Variables:\n=>", qualitative,
+      "\n\nNumerics Variables:\n=>", quantitative)
+
+df.head()
+=======================================================================
+
+dfs = df.describe(include='all').T.fillna('').rename(columns={'freq': 'freq of top'})
+dfs['dtypes'] = df.dtypes
+dfs['Missing'] = df.isnull().sum().values
+dfs
+
+=======================================================================
 
 
 ## ORDEM
@@ -159,6 +184,20 @@ Target by cross Features
 
 
 -----
+
++ [Import Libs and DataSet](#index01) 
++ [Snippets](#index02)
++ [Feature engineering](#index03)
++ [EDA](#index04)
+  - [Each feature individually](#index04)
+  - [Cross two features](#index05)
+  - [Cross all features](#index06)
++ [Pre-Processing](#index07)
++ [Clustering with K-Means](#index08)
+  - [Best K with elbow method](#index09)
+  - [Execute KMeans](#index10)
+  - [Groups Interpreting](#index11)
++ [Conclusion](#index12)
 
 <a id="top"></a>
 
