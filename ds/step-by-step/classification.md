@@ -68,6 +68,7 @@ Test: must be 20% of dataset:
 from sklearn.model_selection import KFold, StratifiedKFold
 
 # Split in 80% Train and 20% Test with same quantity of classes by subset
+# Unbalanced, balance, imbalance
 # See % of classe 0 and 1, is the same between Train and Test
 kfold = StratifiedKFold(n_splits=5, random_state=42, shuffle=True)
 
@@ -300,19 +301,43 @@ df_error = df_post_pred.query("Y_Target != Y_Pred")
 df_error
 ```
 
+## Plot history NeuralNet acc and loss in training
+
+````python
+def plot_nn_loss_acc(history):
+    fig, (axis1, axis2) = plt.subplots(nrows=1, ncols=2, figsize=(16,6))
+
+    # summarize history for accuracy
+    axis1.plot(history.history['accuracy'], label='Train', linewidth=3)
+    axis1.plot(history.history['val_accuracy'], label='Validation', linewidth=3)
+    axis1.set_title('Model accuracy', fontsize=16)
+    axis1.set_ylabel('accuracy')
+    axis1.set_xlabel('epoch')
+    axis1.legend(loc='upper left')
+
+    # summarize history for loss
+    axis2.plot(history.history['loss'], label='Train', linewidth=3)
+    axis2.plot(history.history['val_loss'], label='Validation', linewidth=3)
+    axis2.set_title('Model loss', fontsize=16)
+    axis2.set_ylabel('loss')
+    axis2.set_xlabel('epoch')
+    axis2.legend(loc='upper right')
+    plt.show()
+````
+
 ## Classification Report with ConfMatrix
 
 ````python
 
 from sklearn.metrics import confusion_matrix, classification_report
 
-this_labels = ['Under Average wines','Average wines','Good wines', 'Very Good wines', 'Excellent wines']
+this_labels = ['Negative','Positive']
 
-def class_report(y_target, y_preds, name="", labels=this_labels):
+def class_report(y_real, y_my_preds, name="", labels=this_labels):
     if(name != ''):
         print(name,"\n")
-    print(confusion_matrix(y_test, y_pred))
-    print(classification_report(y_test, y_pred, target_names=labels))
+    print(confusion_matrix(y_real, y_my_preds), '\n')
+    print(classification_report(y_real, y_my_preds, target_names=labels))
 ````
 
 ## Save and Load Models

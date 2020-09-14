@@ -38,10 +38,13 @@ sns.set_style('darkgrid')
 ## `eda_generate_categorical_feat`
 
 ````python
-def eda_categ_feat_desc_plot(series_categorical, title = ""):
+def eda_categ_feat_desc_plot(series_categorical, title = "", fix_labels=False, bar_format='{}'):
     """Generate 2 plots: barplot with quantity and pieplot with percentage. 
        @series_categorical: categorical series
        @title: optional
+       @fix_labels: The labes plot in barplot in sorted by values, some times its bugs cuz axis ticks is alphabethic
+           if this happens, pass True in fix_labels
+       @bar_format: pass {:,.0f} to int
     """
     series_name = series_categorical.name
     val_counts = series_categorical.value_counts()
@@ -58,8 +61,11 @@ def eda_categ_feat_desc_plot(series_categorical, title = ""):
         fig.subplots_adjust(top=0.8)
 
     s = sns.barplot(x=series_name, y='quantity', data=val_concat, ax=ax[0])
+    if(fix_labels):
+        val_concat = val_concat.sort_values(series_name).reset_index()
+    
     for index, row in val_concat.iterrows():
-        s.text(row.name, row['quantity'], row['quantity'], color='black', ha="center")
+        s.text(row.name, row['quantity'], bar_format.format(row['quantity']), color='black', ha="center")
 
     s2 = val_concat.plot.pie(y='percentage', autopct=lambda value: '{:.2f}%'.format(value),
                              labels=val_concat[series_name].tolist(), legend=None, ax=ax[1],
@@ -853,17 +859,17 @@ def describe_y_by_x_cat_boxplot(dtf, x_feat, y_target, title='', figsize=(15,5),
     """
     the_title = title if title != '' else '{} by {}'.format(y_target, x_feat)
     fig, ax1 = plt.subplots(figsize = figsize)
-    sns.boxplot(x=x_feat, y=y_target, data=df_train, ax=ax1)
+    sns.boxplot(x=x_feat, y=y_target, data=dtf, ax=ax1)
     ax1.set_title(the_title, fontsize=18)
-    plt.xticks(rotation=rotatioon_degree) # recomend 70, rotate, rotation, degree
+    plt.xticks(rotation=rotatioon_degree)
     plt.show()
  # Example
- # describe_y_by_x_boxplot(df_train, 'Name', 'Price', figsize=(20,8), rotatioon_degree=65)
+ # describe_y_by_x_cat_boxplot(df, 'score', 'comment_len', figsize=(10,5))
 ```
 
 ![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/describe_y_by_x_cat_boxplot.png)
 
-# NLP
+# NLP, nlp
 
 ## Words Distribution
 
@@ -901,7 +907,9 @@ def plot_words_distribution(mydf, target_column, title='Words distribution', x_a
 ## Top 1,2,3 Words
 
 ```python
-def ngrams_plot(corpus,ngram_range,n=None):
+from sklearn.feature_extraction.text import CountVectorizer
+
+def ngrams_corpus_counter(corpus,ngram_range,n=None):
     """
     List the top n words in a vocabulary according to occurrence in a text corpus.
     """
@@ -914,26 +922,30 @@ def ngrams_plot(corpus,ngram_range,n=None):
     df=pd.DataFrame(total_list,columns=['text','count'])
     return df
 
-# Generate
-df_1_grams = ngrams_plot(df['description'], (1,1), 10)
-df_2_grams = ngrams_plot(df['description'], (2,2), 10)
-df_3_grams = ngrams_plot(df['description'], (3,3), 10)
+def plot_ngrams_words(series_words, title='Top 10 words'):
+    """Plot 3 graphs
+    @series_words: a series where each row is a set of words
+    """
+    # Generate
+    df_1_grams = ngrams_corpus_counter(series_words, (1,1), 10)
+    df_2_grams = ngrams_corpus_counter(series_words, (2,2), 10)
+    df_3_grams = ngrams_corpus_counter(series_words, (3,3), 10)
 
+    fig, axes = plt.subplots(figsize = (18,4), ncols=3)
+    fig.suptitle(title)
 
-# Plot
-fig, axes = plt.subplots(figsize = (18,4), ncols=3)
-fig.suptitle('Top 10 words')
+    sns.barplot(y=df_1_grams['text'], x=df_1_grams['count'],ax=axes[0])
+    axes[0].set_title("1 grams")
 
-sns.barplot(y=df_1_grams['text'], x=df_1_grams['count'],ax=axes[0])
-axes[0].set_title("1 grams")
+    sns.barplot(y=df_2_grams['text'], x=df_2_grams['count'],ax=axes[1])
+    axes[1].set_title("2 grams",)
 
-sns.barplot(y=df_2_grams['text'], x=df_2_grams['count'],ax=axes[1])
-axes[1].set_title("2 grams",)
+    sns.barplot(y=df_3_grams['text'], x=df_3_grams['count'],ax=axes[2])
+    axes[2].set_title("3 grams")
 
-sns.barplot(y=df_3_grams['text'], x=df_3_grams['count'],ax=axes[2])
-axes[2].set_title("3 grams")
-
-plt.show()
+    plt.show()
+    
+# Example: plot_ngrams_words(df['comment'])
 ```
 
 ![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/ngrams_plot.png)

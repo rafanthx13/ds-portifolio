@@ -38,5 +38,11 @@
 + **[Agrupamentos de clientes de shopping](https://www.kaggle.com/rafanthx13/mall-customers-clustering)**
 
 
+### NLP (Processamento de Linguagme Natural)
+
++ **[Classificador de SPAM ou Não-SPAM](https://www.kaggle.com/rafanthx13/spam-detector-text-classify)**
+
++ **[Classificador de sentimento Positivo ou Negativo para avaliações de filmes](https://www.kaggle.com/rafanthx13/films-review-nlp-feeling-text-classification)**
+
 
 <h2 align="center">Feito por 🚀<a href="https://rafanthx13.github.io/">Rafael Morais de Assis</a></h2>

@@ -12,19 +12,25 @@
 + Lidar com missing values
 + converter tipos das columnas para os tipos corretos (o tipo object é para string, se nao for string e tiver isso, muda agora
 
+## DUplicate
+
+df.duplicated().sum()
+
+df.drop_duplicates(inplace=True)
+
 **Missign/Null/Corrupted Values**
 [link](https://dev.to/tomoyukiaota/visualizing-the-patterns-of-missing-value-occurrence-with-python-46dj)
 
 ````python
-sns.heatmap(df.isnull(), cbar=False)
+sns.heatmap(df.isnull(), cbar=False, yticklabels=False)
 import missingno as msno
-# matrix: more easy see missign data in rows
+\# matrix: more easy see missign data in rows
 msno.matrix(df)
-# bar: show quantity
+\# bar: show quantity
 msno.bar(df)
-# correlation between null values
+\# correlation between null values
 msno.heatmap(df)
-# count nan rows
+\# count nan rows
 df.isnull().sum().max()
 ````
 

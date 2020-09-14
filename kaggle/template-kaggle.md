@@ -51,16 +51,13 @@ for dirname, _, filenames in os.walk('/kaggle/input'):
 
 # Configs
 pd.options.display.float_format = '{:,.4f}'.format
-
 sns.set(style="whitegrid")
-
 plt.style.use('seaborn')
-sns.set_palette("Set3") # default seabon: deep || default matplotlib: tab10 || Set1, Set2, Set3, Paired, muted, Accent, Spectral, CMRmap # https://medium.com/@morganjonesartist/color-guide-to-seaborn-palettes-da849406d44f
-
-plt.style.use('seaborn')
-
 seed = 42
 np.random.seed(seed)
+
+==================================================================
+sns.set_palette("Set3") # default seabon: deep || default matplotlib: tab10 || Set1, Set2, Set3, Paired, muted, Accent, Spectral, CMRmap # https://medium.com/@morganjonesartist/color-guide-to-seaborn-palettes-da849406d44f
 
 =======================================================================
 
@@ -198,6 +195,25 @@ Target by cross Features
   - [Execute KMeans](#index10)
   - [Groups Interpreting](#index11)
 + [Conclusion](#index12)
+
++ [Import Libs and DataSet](#index01) 
++ [Snippets](#index02)
++ [EDA](#index03)
++ [Text Cleaning](#index04)
+  - [Def functions](#index05)
+  - [Execute pre-processing](#index06)
++ [Split in train and Test](#index07)
++ [Develop Model](#index08)
++ [Evaluate Model](#index09)
++ [Conclusion](#index10)
+
+df['message'] = df['message'].apply(lambda x: clean_contractions(x, contraction_mapping))
+
+df['message'] = df['message'].apply(lambda x: correct_spelling(x, mispell_dict))
+
+df['new_message'] = df['message'].apply(clean_message)
+
+df['new_message'] = df['new_message'].apply(lambda x: lematizer(x))
 
 <a id="top"></a>
 
