@@ -42,7 +42,8 @@
 
 + **[Classificador de SPAM ou Não-SPAM](https://www.kaggle.com/rafanthx13/spam-detector-text-classify)**
 
-+ **[Classificador de sentimento Positivo ou Negativo para avaliações de filmes](https://www.kaggle.com/rafanthx13/films-review-nlp-feeling-text-classification)**
++ **[Classificador de sentimento Positivo ou Negativo para avaliações de filmes em inglês](https://www.kaggle.com/rafanthx13/films-review-nlp-feeling-text-classification)**
 
++ **[Classificador de comentário de produtos em português](https://www.kaggle.com/rafanthx13/reviewer-of-product-comments-in-portuguese)**
 
 <h2 align="center">Feito por 🚀<a href="https://rafanthx13.github.io/">Rafael Morais de Assis</a></h2>

@@ -122,7 +122,11 @@ for key, value in dict.items():
 	print(key, value)
 ```
 
+**Invert Reverse, inverter dict, dicitonario**
+inv_map = {v: k for k, v in my_map.items()}
+
 **Iterar row por row de um dataFrame**
+
 
 ```
 for index, row in df.iterrows():
