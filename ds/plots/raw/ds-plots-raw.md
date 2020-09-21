@@ -30,6 +30,16 @@ sns.set_style('darkgrid')
 
 ```
 
+## DESCRIBE ALL
+
+```python
+for col in train.columns:
+    print(f"{col} : {train[col].nunique()}")
+    print(train[col].unique())
+```
+
+
+
 # Categorical Feat
 
 
@@ -38,7 +48,7 @@ sns.set_style('darkgrid')
 ## `eda_generate_categorical_feat`
 
 ````python
-def eda_categ_feat_desc_plot(series_categorical, title = "", fix_labels=False, bar_format='{}'):
+def eda_categ_feat_desc_plot(series_categorical, title = "", fix_labels=False):
     """Generate 2 plots: barplot with quantity and pieplot with percentage. 
        @series_categorical: categorical series
        @title: optional
@@ -65,7 +75,7 @@ def eda_categ_feat_desc_plot(series_categorical, title = "", fix_labels=False, b
         val_concat = val_concat.sort_values(series_name).reset_index()
     
     for index, row in val_concat.iterrows():
-        s.text(row.name, row['quantity'], bar_format.format(row['quantity']), color='black', ha="center")
+        s.text(row.name, row['quantity'], '{:,d}'.format(row['quantity']), color='black', ha="center")
 
     s2 = val_concat.plot.pie(y='percentage', autopct=lambda value: '{:.2f}%'.format(value),
                              labels=val_concat[series_name].tolist(), legend=None, ax=ax[1],
@@ -661,33 +671,58 @@ s[:10]
 
 ![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/ranking-correlation.png)
 
-### Top and Bottom Correlation to target_column
+### Sorted Corr to target column
 
 ```python
-def plot_top_rank_correlation(my_df, column_target, top_rank=5):
+def plot_top_rank_correlation(my_df, column_target):
+    corr_matrix = my_df.corr()
+    top_rank = len(corr_matrix)
+    f, ax1 = plt.subplots(ncols=1, figsize=(18, 6), sharex=False)
+
+    ax1.set_title('Top Correlations to {}'.format(top_rank, column_target))
+    
+    cols_top = corr_matrix.nlargest(len(corr_matrix), column_target)[column_target].index
+    cm = np.corrcoef(my_df[cols_top].values.T)
+    mask = np.zeros_like(cm)
+    mask[np.triu_indices_from(mask)] = True
+    hm = sns.heatmap(cm, cbar=True, annot=True, square=True, fmt='.2f',
+                     annot_kws={'size': 10}, yticklabels=cols_top.values,
+                     xticklabels=cols_top.values, mask=mask, ax=ax1)
+    
+    plt.show()
+```
+
+![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/plot_top_rank_correlation_2.png)
+
+### Top and Bottom Correlation to target_column
+
+To big number of features
+
+```python
+def plot_top_bottom_rank_correlation(my_df, column_target, top_rank=5):
     corr_matrix = my_df.corr()
     f, (ax1, ax2) = plt.subplots(ncols=2, figsize=(18, 6), sharex=False)
 
     ax1.set_title('Top {} Positive Corr to {}'.format(top_rank, column_target))
     ax2.set_title('Top {} Negative Corr to {}'.format(top_rank, column_target))
     
-    cols_top = corrmat.nlargest(top_rank+1, column_target)[column_target].index
+    cols_top = corr_matrix.nlargest(top_rank+1, column_target)[column_target].index
     cm = np.corrcoef(my_df[cols_top].values.T)
     mask = np.zeros_like(cm)
     mask[np.triu_indices_from(mask)] = True
     hm = sns.heatmap(cm, cbar=True, annot=True, square=True, fmt='.2f',
-                     annot_kws={'size': 8}, yticklabels=cols.values,
-                     xticklabels=cols.values, mask=mask, ax=ax1)
+                     annot_kws={'size': 8}, yticklabels=cols_top.values,
+                     xticklabels=cols_top.values, mask=mask, ax=ax1)
     
-    cols_bot = corrmat.nsmallest(top_rank, column_target)[column_target].index
+    cols_bot = corr_matrix.nsmallest(top_rank, column_target)[column_target].index
     cols_bot  = cols_bot.insert(0, column_target)
     print(cols_bot)
     cm = np.corrcoef(my_df[cols_bot].values.T)
     mask = np.zeros_like(cm)
     mask[np.triu_indices_from(mask)] = True
     hm = sns.heatmap(cm, cbar=True, annot=True, square=True, fmt='.2f',
-                     annot_kws={'size': 8}, yticklabels=cols.values,
-                     xticklabels=cols.values, mask=mask, ax=ax2)
+                     annot_kws={'size': 10}, yticklabels=cols_bot.values,
+                     xticklabels=cols_bot.values, mask=mask, ax=ax2)
     
     plt.show()
 ```
@@ -854,7 +889,7 @@ plot_model_score_regression(list(scores.keys()), [score for score, _ in scores.v
 ## EDA Describe X by Y
 
 ```python
-def describe_y_by_x_cat_boxplot(dtf, x_feat, y_target, title='', figsize=(15,5), rotatioon_degree=0):
+def describe_y_numeric_by_x_cat_boxplot(dtf, x_feat, y_target, title='', figsize=(15,5), rotatioon_degree=0):
     """ Generate a quickly boxplot  to describe each Ŷ by each categorical value of x_feat
     """
     the_title = title if title != '' else '{} by {}'.format(y_target, x_feat)
@@ -864,7 +899,7 @@ def describe_y_by_x_cat_boxplot(dtf, x_feat, y_target, title='', figsize=(15,5),
     plt.xticks(rotation=rotatioon_degree)
     plt.show()
  # Example
- # describe_y_by_x_cat_boxplot(df, 'score', 'comment_len', figsize=(10,5))
+ # describe_y_numeric_by_x_cat_boxplot(df, 'score', 'comment_len', figsize=(10,5))
 ```
 
 ![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/describe_y_by_x_cat_boxplot.png)
@@ -949,3 +984,4 @@ def plot_ngrams_words(series_words, title='Top 10 words'):
 ```
 
 ![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/ngrams_plot.png)
+

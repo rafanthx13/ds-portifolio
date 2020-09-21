@@ -25,6 +25,10 @@
 
 + **[Lista de Passageiros do Desatre do Navio da Estonia: Classificar sobrevivência ou não a catastrofe](https://www.kaggle.com/rafanthx13/estonia-disaster-eda-and-classify)**: Classificaçâo de registros de uma lsita de passageiros se sobrevivem ou não.
 
++ **[Classificação de Churn para Telecom](https://www.kaggle.com/rafanthx13/telcom-churn-classify)**
+
++ **[Classificação de Interesse em Seguros de Veículos](https://www.kaggle.com/rafanthx13/vehicle-insurance-eda-and-classify)**
+
 ### Regressão
 
 + **[Prever Preço de Casa](https://www.kaggle.com/rafanthx13/house-prices-eda-and-regression)**: Atividade de Regressão, com base em cerca de 80 características de uma casa, prever o seu valor de venda.

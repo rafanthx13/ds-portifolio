@@ -1,6 +1,6 @@
 # NLP Snippets
 
-## Mostrar a difenreça do texto antes e depois de text_cleaning
+## Mostrar diferenla do texto antes e depois de text_cleaning
 
 ````python
 import random 

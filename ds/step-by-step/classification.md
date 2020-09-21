@@ -1,7 +1,5 @@
 # Classification Snippets
 
-
-
 ## Split in Train/Test Strategies
 
 ### Check Balanced between train and test
@@ -94,27 +92,21 @@ check_balanced_train_test_binary(x_train1, y_train1, x_test1, y_test1, len(df), 
 
 ## Models Devs
 
-### Test All models
+**Import Libs**
 
 ```python
-# use: x_train, y_train, x_test, y_test
-
 # Classifier Libraries
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
 
 # Ensemble Classifiers
-from sklearn.ensemble import AdaBoostClassifier
-from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.ensemble import BaggingClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.ensemble import ExtraTreesClassifier
+from sklearn.ensemble import AdaBoostClassifier, BaggingClassifier, ExtraTreesClassifier
+from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
 
 # Others Linear Classifiers
-from sklearn.linear_model import SGDClassifier, RidgeClassifier
+from sklearn.linear_model import LogisticRegression, SGDClassifier, RidgeClassifier
 from sklearn.linear_model import Perceptron, PassiveAggressiveClassifier
 
 # xboost
@@ -123,8 +115,7 @@ from lightgbm import LGBMClassifier
 
 # scores
 from sklearn.model_selection import cross_val_score
-from sklearn.metrics import f1_score
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import f1_score, accuracy_score
 
 # neural net of sklearn
 from sklearn.neural_network import MLPClassifier
@@ -132,155 +123,121 @@ from sklearn.neural_network import MLPClassifier
 # others
 import time
 import operator
+```
 
+**Create Models**
+
+```python
 # def neural nets
 mlp = MLPClassifier(verbose = False, max_iter=1000, tol = 0.000010,
                     solver = 'adam', hidden_layer_sizes=(100), activation='relu')
 
-# def classifiers
-
-nn_classifiers = {
-    "Multi Layer Perceptron": mlp
-}
-
-linear_classifiers = {
-    "SGDC": SGDClassifier(),
+all_classifiers = {
+    "NaiveBayes": GaussianNB(),
     "Ridge": RidgeClassifier(),
     "Perceptron": Perceptron(),
-    "PassiveAggressive": PassiveAggressiveClassifier()
-}
-
-gboost_classifiers = {
+    'NeuralNet': mlp,
+    "PassiveAggr": PassiveAggressiveClassifier(),
     "XGBoost": XGBClassifier(),
     "LightGB": LGBMClassifier(),
-}
-
-classifiers = {
-    "Naive Bayes": GaussianNB(),
-    "Logisitic Regression": LogisticRegression(),
+    "SVM": SVC(),
+    "LogisiticR": LogisticRegression(),
     "KNearest": KNeighborsClassifier(),
-    "Support Vector Machine": SVC(),
-    "Decision Tree": DecisionTreeClassifier()
-}
-
-ensemble_classifiers = {
+    "DecisionTree": DecisionTreeClassifier(),
     "AdaBoost": AdaBoostClassifier(),
+    "SGDC": SGDClassifier(),
     "GBoost": GradientBoostingClassifier(),
     "Bagging": BaggingClassifier(),
-    "Random Forest": RandomForestClassifier(),
-    "Extra Trees": ExtraTreesClassifier()    
+    "RandomForest": RandomForestClassifier(),
+    "ExtraTree": ExtraTreesClassifier()
 }
+```
 
-all_classifiers = {
-    "Simple Models": classifiers,
-    "Ensemble Models": ensemble_classifiers,
-    "GBoost Models": gboost_classifiers,
-    "NeuralNet Models": nn_classifiers,
-    "Others Linear Models": linear_classifiers,
-}
+**Cv, fit and test**
 
-metrics = {
-    'cv_scores': {},
-    'acc_scores': {},
-    'f1_mean_scores': {},
-}
+```python
+metrics = { 'cv_acc': {}, 'acc_test': {}, 'f1_test': {} }
+m = list(metrics.keys())
+time_start = time.time()
+print('CrossValidation, Fitting and Testing')
 
-format_float = "{:.4f}"
+m = list(metrics.keys())
 
-is_print = False # True/False
+print('CrossValidation, Fitting and Testing')
 
 time_start = time.time()
 
-print("Fit Many Classifiers")
-
-for key, classifiers in all_classifiers.items():
-    if (is_print):
-        print("\n{}\n".format(key))
-    for key, classifier in classifiers.items():
-        t0 = time.time()
-        # xsm_train, ysm_train || x_train, y_train
-        classifier.fit(x_train, y_train) 
-        t1 = time.time()
-        # xsm_train, ysm_train || x_train, y_train
-        training_score = cross_val_score(classifier, x_train, y_train, cv=5) 
-        y_pred = classifier.predict(x_test)
-        cv_score = round(training_score.mean(), 4) * 100
-        acc_score = accuracy_score(y_test, y_pred)
-        f1_mean_score = f1_score(y_test, y_pred, average="macro") # average =  'macro' or 'weighted'
-        if (is_print):
-            print(key, "\n\tHas a training score of", 
-                  cv_score, "% accuracy score on CrossVal with 5 cv ")
-            print("\tTesting:")
-            print("\tAccuracy in Test:", format_float.format(acc_score))
-            print("\tF1-mean Score:", format_float.format(f1_mean_score)) 
-            print("\t\tTime: The fit time took {:.2} s".format(t1 - t0), '\n')
-        metrics['cv_scores'][key] = cv_score
-        metrics['acc_scores'][key] = acc_score
-        metrics['f1_mean_scores'][key] = f1_mean_score
-        
-time_end = time.time()
-        
-print("\nDone in {:.5} s".format(time_end - time_start), '\n')
-        
-print("Best cv score:", max( metrics['cv_scores'].items(), key=operator.itemgetter(1) ))
-print("Best Accuracy score:", max( metrics['acc_scores'].items(), key=operator.itemgetter(1) ))
-print("Best F1 score:", max( metrics['f1_mean_scores'].items(), key=operator.itemgetter(1) ))
-
-lists = [list(metrics['cv_scores'].values()),
-         list(metrics['acc_scores'].values()),
-         list(metrics['f1_mean_scores'].values())
-        ]
-
-a_columns = list(metrics['cv_scores'].keys())
-
-df_metrics = pd.DataFrame(lists , columns = a_columns,
-                    index = ['cv_scores', 'acc_scores', 'f1_scores'] )
+# Cross Validation, Fit and Test
+for name, model in all_classifiers.items():
+    print('{:15}'.format(name), end='')
+    t0 = time.time()
+    # Cross Validation
+    training_score = cross_val_score(model, x_train, y_train, scoring="accuracy", cv=4)
+    # Fitting
+    all_classifiers[name] = model.fit(x_train, y_train) 
+    # Testing
+    y_pred = all_classifiers[name].predict(x_test)
+    t1 = time.time()
+    # Save metrics
+    metrics[m[0]][name] = training_score.mean()
+    metrics[m[1]][name] = accuracy_score(y_test, y_pred)
+    metrics[m[2]][name] = f1_score(y_test, y_pred, average="macro") 
+    # Show metrics
+    print('| {}: {:6,.4f} | {}: {:6,.4f} | {}: {:6.4f} | took: {:>15} |'.format(
+        m[0], metrics[m[0]][name], m[1], metrics[m[1]][name], m[2], metrics[m[2]][name], time_spent(t0) ))
 ```
 
 **Generate DataFrame with Scores**
 
 ```python
-lists = [list(metrics['cv_scores'].values()),
-         list(metrics['acc_scores'].values()),
-         list(metrics['f1_mean_scores'].values())
-        ]
+print("\nDone in {}".format(time_spent(time_start)), '\n')
+print("Best cv acc  :", max( metrics[m[0]].items(), key=operator.itemgetter(1) ))
+print("Best acc test:", max( metrics[m[1]].items(), key=operator.itemgetter(1) ))
+print("Best f1 test :", max( metrics[m[2]].items(), key=operator.itemgetter(1) ))
 
-a_columns = list(metrics['cv_scores'].keys())
-
-dfre1 = pd.DataFrame(lists , columns = a_columns,
-                    index = ['cv_scores', 'acc_scores', 'f1_scores'] )
-
-dfre1 = dfre1.T.sort_values(by="acc_scores", ascending=False)
-dfre1
+df_metrics = pd.DataFrame(data = [list(metrics[m[0]].values()),
+                                  list(metrics[m[1]].values()),
+                                  list(metrics[m[2]].values())],
+                          index = ['cv_acc', 'acc_test', 'f1_test'],
+                          columns = metrics[m[0]].keys() ).T.sort_values(by=m[0], ascending=False)
+df_metrics
 ```
+
+
 
 ## Unbalanced DataSet
 
 ### OverSampling and UnderSampling in trainDataSet
 
 ```python
-from imblearn.over_sampling import RandomOverSampler, SMOTE
+from imblearn.over_sampling import RandomOverSampler, SMOTE, ADASYN, SVMSMOTE, BorderlineSMOTE
 from imblearn.under_sampling import RandomUnderSampler, TomekLinks, NearMiss
-from imblearn.combine import SMOTEENN, SMOTETomek
+from imblearn.combine import SMOTEENN, SMOTETomek # over and under sampling
 from imblearn.metrics import classification_report_imbalanced
 
-print("train dataset before", x_train.shape[0])
+imb_models = {
+    'ADASYN': ADASYN(random_state=42),
+    'SMOTE': SMOTE(random_state=42),
+    'SMOTEENN': SMOTEENN("minority", random_state=42),
+    'SMOTETomek': SMOTETomek(tomek=TomekLinks(sampling_strategy='majority'), random_state=42),
+    'RandomUnderSampler': RandomUnderSampler(random_state=42)
+}
 
-SMOTE_strategy = "SMOTE" # SMOTE, SMOTEENN, SMOTETomek
-print("SMOTE STRATEGY:", SMOTE_strategy)
+imb_strategy = "RandomUnderSampler"
 
-if(SMOTE_strategy == "SMOTE"):
-    sm = SMOTE('minority', random_state=42)
-elif(SMOTE_strategy == "SMOTEENN"):
-    sm = SMOTEENN("minority", random_state=42)
-elif(SMOTE_strategy == 'SMOTETomek'):
-    sm = SMOTETomek(tomek=TomekLinks(sampling_strategy='majority'))
+if(imb_strategy != "None"):
+    before = x_train.shape[0]
+
+    imb_tranformer = imb_models[imb_strategy]
     
-# Treina os dados originais utilizando SMOTE
-xsm_train, ysm_train = sm.fit_sample(x_train, y_train)
+    x_train, y_train = imb_tranformer.fit_sample(x_train, y_train)
 
-print("train dataset before", xsm_train.shape[0],
-      'generate', xsm_train.shape[0] - x_train.shape[0] )
+    print("train dataset before: {:,d}\nimbalanced_strategy: {}".format(before, imb_strategy),
+          "\ntrain dataset after: {:,d}\ngenerate: {:,d}".format(x_train.shape[0], x_train.shape[0] - before))
+
+else:
+    print("Dont correct unbalanced dataset")
+# check_balanced_train_test_binary(x_train, y_train, x_test, y_test, len(df), ['Response 0', 'Response 1'])
 ```
 
 ## Create DF of errors of model
@@ -328,16 +285,26 @@ def plot_nn_loss_acc(history):
 ## Classification Report with ConfMatrix
 
 ````python
-
 from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.metrics import accuracy_score, f1_score
 
-this_labels = ['Negative','Positive']
+this_labels = ['HAM','SPAM']
+scoress = {}
 
 def class_report(y_real, y_my_preds, name="", labels=this_labels):
     if(name != ''):
         print(name,"\n")
     print(confusion_matrix(y_real, y_my_preds), '\n')
     print(classification_report(y_real, y_my_preds, target_names=labels))
+    scoress[name] = [accuracy_score(y_test, y_pred), f1_score(y_test, y_pred, average='macro')]
+    
+# Create DataFrame from Scores maded by 'class_report'
+def create_df_fom_scores(scores=scoress):
+    return pd.DataFrame(data= scoress.values(),
+            columns=['acc','f1'],
+            index=scoress.keys())
+
+# Create: create_df_fom_scores()
 ````
 
 ## Save and Load Models
