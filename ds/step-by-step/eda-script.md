@@ -1,5 +1,13 @@
 # EDA
 
+**a**
+find row taht has part of string
+continents = df[ df['entity'].str.contains("other")]
+
+**REMOVE LINHAS QUE TENHAM ESSA STRING EM UMA CERTA COLUNA**
+df1.drop( df1[df1['entity'].isin(['France'])].index, axis=0)
+
+
 ## Passo a Passo EDA
 
 **Introduction**
@@ -41,7 +49,7 @@ df.isnull().sum().max()
   - df['feat'].fillna(df['feat'].median(), inplace = True)
 
 **REmover certas linhas especificas**
-# Remove outliers
+# Remove Delete outliers
 df_train.drop(df_train[(df_train['OverallQual']<5) & (df_train['SalePrice']>200000)].index, inplace=True)
 
 **EM PROBLEMAS DE CLASSIFICAÇÂO, É BOM FICAR LIGADO NO DESBALANCEAMENTO: Se for, a divisâo da base entre treino e testse também deve está balanceado**

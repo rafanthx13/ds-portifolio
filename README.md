@@ -13,11 +13,13 @@
 
 ### Análise Exploratória de Dados
 
-+ **[Preço de Gasolina e produtos similares no Brasil](https://www.kaggle.com/rafanthx13/gas-prices-in-brazil-eda)**: Análise e investigação dos dados da ANP (Agência Nacional do Petróleo, Gás Natural e Biocombustíveis) sobre preços de gasolina e produtos similares em postos de gasolina entre 2004 2019.
++ **[Evolução do preço Gasolina no Brasil](https://www.kaggle.com/rafanthx13/gas-prices-in-brazil-eda)**: Análise e investigação dos dados da ANP (Agência Nacional do Petróleo, Gás Natural e Biocombustíveis) sobre preços de gasolina e produtos similares em postos de gasolina entre 2004 2019.
 
 + **[Níveis de poluentes em Seoul por distrito](https://www.kaggle.com/rafanthx13/air-pollution-in-seoul-eda)**:Análise Exploratória dos dados dos níveis de seis poluentes (SO, CO, NO2, O3, PM10, PM2.5) no ar, feitos na cidade de Seoul (Capital da Coreia do Sul).
 
 + **[Tiroteios com mortes causadas por policias nos Estados Unidos](https://www.kaggle.com/rafanthx13/us-police-shooting-eda-with-maps-visualisation)**:Análise Exploratória de dados sobre morte causadas por policiais americanos jundamente com o census demográfico de 2017 para buscar se existe correlação com raça e onde essa correlaçâo é maior ou menor.
+
++ **[Evolução da Emissão de CO2 no mundo](https://www.kaggle.com/rafanthx13/co2-emissions-in-the-world-over-time)**
 
 ### Classificação
 
@@ -41,13 +43,12 @@
 
 + **[Agrupamentos de clientes de shopping](https://www.kaggle.com/rafanthx13/mall-customers-clustering)**
 
-
 ### NLP (Processamento de Linguagme Natural)
 
 + **[Classificador de SPAM ou Não-SPAM](https://www.kaggle.com/rafanthx13/spam-detector-text-classify)**
 
 + **[Classificador de sentimento Positivo ou Negativo para avaliações de filmes em inglês](https://www.kaggle.com/rafanthx13/films-review-nlp-feeling-text-classification)**
 
-+ **[Classificador de comentário de produtos em português](https://www.kaggle.com/rafanthx13/reviewer-of-product-comments-in-portuguese)**
++ **[Classificador de comentário de produtos em português](https://www.kaggle.com/rafanthx13/reviewer-of-product-comments-in-portuguese)**: Classifica comentários em português como Positivos ou Negativos
 
 <h2 align="center">Feito por 🚀<a href="https://rafanthx13.github.io/">Rafael Morais de Assis</a></h2>

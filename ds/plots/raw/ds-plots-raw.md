@@ -1,21 +1,6 @@
 # DS PLOTS
 
-## Plletas do Seaborn
-
-```
-palette="Set3"
-palette="husl"
-```
-
-## Como documentar
-
-```python
-def abc():
-    """começa aqui
-    depois aki
-    @para variaveis
-    """
-```
+# GENERAL
 
 ## Config sns or plot
 
@@ -27,25 +12,122 @@ Isso vai mudar tambem os plot do matplot lib
 
 color = sns.color_palette()
 sns.set_style('darkgrid')
-
 ```
 
-## DESCRIBE ALL
+## time_spent
 
 ```python
-for col in train.columns:
-    print(f"{col} : {train[col].nunique()}")
-    print(train[col].unique())
+import time
+
+def time_spent(time0):
+    t = time.time() - time0
+    t_int, t_min = int(t) // 60, t % 60
+    return '{} min {:6.3f} s'.format(t_int, t_min) if t_int != 0 else '{:.3f} s'.format(t_min)
+```
+
+
+
+## Describe with value_counts
+
+```python
+def df_value_counts(df0):
+    columns = df.columns.tolist()
+    for c in columns:
+        dtype = df0[c].dtype
+        print('Column: "{}" | Type: {}\n==> '.format(c, dtype), end='')
+        print('NUMBER OF UNIQUE VALUES: {:,d}\n==> '.format(len(df0[c].unique())), end='')
+        # String, Categorical Feature
+        if(dtype in ['O', 'object']):
+            df_cat = pd.concat([df0[c].value_counts(), df0[c].value_counts(normalize=True)], axis=1).reset_index()
+            df_cat.columns = ['values', 'count', 'percentage']
+            if(len(df_cat) < 50):
+                print('CATEGORICAL VALUES: ', end='')
+                for _, row in df_cat.iterrows():
+                    print('{} ({:,d} = {:.2%}) ; '.format(row['values'], row['count'], row['percentage']), end='')
+            else:
+                acount = 0
+                print('SOME CAT VALUES: ', end='')
+                for _, row in df_cat.iterrows():
+                    print('{} ({:,d} = {:.2%}) ; '.format(row['values'], row['count'], row['percentage']), end='')
+                    acount += 1
+                    if(acount > 15):
+                        break
+        # Number Feature
+        elif(dtype in ['int64','float64']):
+            df_int = pd.concat([df[c].value_counts(), df[c].value_counts(normalize=True)], axis=1).reset_index()
+            df_int.columns = ['values', 'count', 'percentage']
+            text = 'BINARY CAT VALUES: ' if len(df0[c]) == 2 else 'NUMERIC VALUES: '            
+            print(text, end='')
+            if(len(df_int) < 25):
+                # Number but Binary Cat Feature
+                for _, row in df_int.iterrows():
+                    print('{} ({:,d} = {:.2%}) ; '.format(row['values'], int(row['count']), row['percentage']), end='')
+            else:
+                # Numeric Feature
+                acount = 0
+                for _, row in df_int.iterrows():
+                    print('{} ({:,d} = {:.2%}) ; '.format(row['values'], int(row['count']), row['percentage']), end='')
+                    acount += 1
+                    if(acount > 10):
+                        break
+                # Statistic
+                print('\n==> STATISTICS:\n     ==> | ', end='')
+                describ = df0[c].describe()
+                acount = 0
+                for index, value in abc.iteritems():
+                    print('{}: {:,.3f} | '.format(index, value), end='')
+                    acount += 1
+                    if(acount == 4):
+                        print('\n     ==> | '.format(index, value), end='')
+        print('\n')
+# df_value_counts(df)
+```
+
+## Describe Transposte
+
+```python
+def generate_columns_from_index(topnum):
+    adict = {}
+    for i in range(topnum):
+        adict[i] = 'top' + str(i+1) + '°'
+    return adict
+
+def eda_categ_feat_T_rankend(series, top_num):
+    return eda_categ_feat_desc_df(series).head(top_num).T.rename(generate_columns_from_index(top_num),axis='columns')
 ```
 
 
 
 # Categorical Feat
 
+## Cat feat top slice
+
+```python
+def eda_cat_top_slice_count(s, start=1, end=None, rotate=0):
+    # @rotate: 45/80; 
+    column, start, threshold = s.name, start - 1, 30
+    s = df[column].value_counts()
+    lenght = len(s)
+    if(end is None):
+        end = lenght if lenght <= threshold else threshold
+    s = s.reset_index()[start:end]
+    s = s.rename(columns = {column: 'count'}).rename(columns = {'index': column,})
+    fig, ax = plt.subplots(figsize = (12,4))
+    barplot = sns.barplot(x=s[column], y=s['count'], ax=ax)
+    # sort by name
+    s = s.sort_values(column).reset_index()
+    for index, row in s.iterrows():
+        barplot.text(row.name, row['count'], '{:,d}'.format(row['count']), color='black', ha="center")
+    ax.set_title('Quantity Plot to {}. Top {}°-{}°'.format(column, start+1, end))
+    plt.xticks(rotation=rotate)
+    plt.show()
+# eda_cat_top_slice_count(df['Year'], start=5, end=10, rotate=0)
+```
+
+![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/eda_cat_top_slice_count.png)
 
 
-
-## `eda_generate_categorical_feat`
+## EDA categorical feature
 
 ````python
 def eda_categ_feat_desc_plot(series_categorical, title = "", fix_labels=False):
@@ -107,20 +189,6 @@ def eda_categ_feat_desc_df(series_categorical):
 
 ![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/eda_g_categorical_df.png)
 
-### Generate df Tranposted ranked
-
-```python
-def generate_columns_from_index(topnum):
-    adict = {}
-    for i in range(topnum):
-        adict[i] = 'top' + str(i+1) + '°'
-    return adict
-
-def eda_categ_feat_T_rankend(series, top_num):
-    return eda_categ_feat_desc_df(series).head(top_num).T.rename(generate_columns_from_index(top_num),axis='columns')
-    
-```
-
 
 
 ## Horizontal Bar with Seaborn (labeled)
@@ -169,20 +237,43 @@ plt.show()
 
 ![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/big-plot-categorical.png)
 
-## Lib missing
+
+
+
+
+## Tree Map to categorical features
 
 ```python
-sns.heatmap(df.isnull(), cbar=False)
+import squarify 
+import matplotlib
+
+def tree_map_cat_feat(dfr, column, title='', threshold=1, figsize=(18, 6), alpha=.7):
+    """ Print treempa to categorical variables
+    Ex: tree_map_cat_feat(df, 'country', 'top countries in country', 200)
+    """
+    plt.figure(figsize=figsize)
+    df_series = dfr[column].value_counts()
+    df_mins = df_series[ df_series <= threshold ].sum()
+    df_series = df_series[ df_series > threshold ]
+    df_series['Others'] = df_mins
+    percentages = df_series / df_series.sum()
+    alist, mini, maxi = [], min(df_series), max(df_series)
+    for i in range(len(df_series)):
+        alist.append( df_series.index[i] + '\n{:.2%}'.format(percentages[i]) )
+    # https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html
+    cmap = matplotlib.cm.viridis # Blues, plasma, inferno. 
+    norm = matplotlib.colors.Normalize(vmin=mini, vmax=maxi)
+    colors = [cmap(norm(i)) for i in df_series]
+    squarify.plot(sizes=df_series.values, label=alist, color=colors, alpha=alpha)
+    plt.axis('off')
+    plt.title(title)
+    plt.show()
+# tree_map_cat_feat(df, 'top countries', 200)
 ```
 
-![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/sns-heartmap.png)
+![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/tree_map_cat_feat.png)
 
-```python
-import missingno as msno
-msno.bar(df)
-```
-
-![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/missingno.png)
+# GEO PLOT
 
 ## Plot Brazil States with bokeh
 
@@ -352,74 +443,11 @@ def eda_foward_2_plots(my_df, primary_column, target_column, first_title, second
 
 
 
-## Generate ManyBoxPlot with seaborn
-
-```python
-f, ((ax1, ax2, ax3), (ax4, ax5, ax6)) = plt.subplots(ncols=3, nrows=2, figsize=(15, 7), sharex=False)
-
-map_feat_ax = {'SO2': ax1, 'NO2': ax2, 'O3': ax3, 'CO': ax4, 'PM10': ax5, 'PM2.5': ax6}
-
-for key, value in map_feat_ax.items():
-    sns.boxplot(x=df[key], ax=value)
-    
-plt.show()
-```
-
-![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/g_many_boxplots.png)
-
-## Generate Many `describe()` to some columns
-
-```python
-gas_list = list(map_feat_ax.keys())
-
-list_describes = []
-for f in gas_list:
-    list_describes.append(df[f].describe())
-
-df_describe_gas1 = pd.concat(list_describes, axis = 1)
-df_describe_gas1  
-```
-
-![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/g_many_describes.png)
-
-
-
-## Tree Map to categorical features
-
-```python
-import squarify 
-import matplotlib
-
-def tree_map_cat_feat(dfr, column, title='', threshold=1, figsize=(18, 6), alpha=.7):
-    """ Print treempa to categorical variables
-    Ex: tree_map_cat_feat(df, 'country', 'top countries in country', 200)
-    """
-    plt.figure(figsize=figsize)
-    df_series = dfr[column].value_counts()
-    df_mins = df_series[ df_series <= threshold ].sum()
-    df_series = df_series[ df_series > threshold ]
-    df_series['Others'] = df_mins
-    percentages = df_series / df_series.sum()
-    alist, mini, maxi = [], min(df_series), max(df_series)
-    for i in range(len(df_series)):
-        alist.append( df_series.index[i] + '\n{:.2%}'.format(percentages[i]) )
-    # https://matplotlib.org/3.1.0/tutorials/colors/colormaps.html
-    cmap = matplotlib.cm.viridis # Blues, plasma, inferno. 
-    norm = matplotlib.colors.Normalize(vmin=mini, vmax=maxi)
-    colors = [cmap(norm(i)) for i in df_series]
-    squarify.plot(sizes=df_series.values, label=alist, color=colors, alpha=alpha)
-    plt.axis('off')
-    plt.title(title)
-    plt.show()
-```
-
-![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/tree_map_cat_feat.png)
-
-# Numerical Feat
+# OUTLIERS
 
 ## Filter outiliers from a series
 
-REmove outiliers de uma serie, a saida é a serie sem outiliers. útil para fazer análise de feature, pois, se houver muitos outiliers vai atrapalhar os gráficos
+Remove outiliers de uma serie, a saida é a serie sem outiliers. útil para fazer análise de feature, pois, se houver muitos outiliers vai atrapalhar os gráficos
 
 ```python
 def series_remove_outiliers(series):
@@ -443,7 +471,32 @@ def series_remove_outiliers(series):
     return series_no_outiliers
 ```
 
+## Filter Outiliers from a Series of DataFrame
 
+```python
+def df_remove_outiliers_from_a_serie(mydf, series_name):
+    # Use IQR Strategy
+    # https://machinelearningmastery.com/how-to-use-statistics-to-identify-outliers-in-data/
+    # def quantils
+    series = mydf[series_name]
+    q25, q75 = series.quantile(0.25), series.quantile(0.75)
+    iqr = q75 - q25
+    print('Percentiles: 25th=%.3f, 75th=%.3f, IQR=%.3f' % (q25, q75, iqr))
+    cut_off = iqr * 1.5
+    lower, upper = q25 - cut_off, q75 + cut_off
+    # identify outliers
+    print('Cut Off: below than', lower, 'and above than', upper)
+    outliers = series[ (series > upper) | (series < lower)]
+    print('Identified outliers: {:,d}'.format(len(outliers)), 'that are',
+          '{:.2%}'.format(len(outliers)/len(series)), 'of total data')
+    # remove outliers
+    outliers_removed = [x for x in series if x >= lower and x <= upper]
+    print('Non-outlier observations: {:,d}'.format(len(outliers_removed)))
+    mydf = mydf[ (mydf[series_name] <= upper) & (mydf[series_name] >= lower) ]
+    return mydf
+```
+
+# NUMERICAL FEAT
 
 ## describe, boxplot (with label) and distplot to numerical feat
 
@@ -495,45 +548,83 @@ def eda_numerical_feat(series, title="", with_label=True, number_format="", show
 
 # CLASSIFICATION PLOTS
 
-## BoxPlot by class
+## Describe Target Y by CatFeat
 
 ```python
-f, (axes, axes2) = plt.subplots(ncols=4, nrows=2, figsize=(20,10))
-
-colors = ["#0101DF", "#DF0101"]
-
-# Negative Correlations with our Class (The lower our feature value the more likely it will be a fraud transaction)
-sns.boxplot(x="Class", y="V17", data=new_df, palette=colors, ax=axes[0])
-axes[0].set_title('V17 vs Class Negative Correlation')
-
-sns.boxplot(x="Class", y="V14", data=new_df, palette=colors, ax=axes[1])
-axes[1].set_title('V14 vs Class Negative Correlation')
-
-sns.boxplot(x="Class", y="V12", data=new_df, palette=colors, ax=axes[2])
-axes[2].set_title('V12 vs Class Negative Correlation')
-
-sns.boxplot(x="Class", y="V10", data=new_df, palette=colors, ax=axes[3])
-axes[3].set_title('V10 vs Class Negative Correlation')
-
-# Positive correlations (The higher the feature the probability increases that it will be a fraud transaction)
-sns.boxplot(x="Class", y="V11", data=new_df, palette=colors, ax=axes2[0])
-axes2[0].set_title('V11 vs Class Positive Correlation')
-
-sns.boxplot(x="Class", y="V4", data=new_df, palette=colors, ax=axes2[1])
-axes2[1].set_title('V4 vs Class Positive Correlation')
-
-sns.boxplot(x="Class", y="V2", data=new_df, palette=colors, ax=axes2[2])
-axes2[2].set_title('V2 vs Class Positive Correlation')
-
-sns.boxplot(x="Class", y="V19", data=new_df, palette=colors, ax=axes2[3])
-axes2[3].set_title('V19 vs Class Positive Correlation')
-
-plt.show()
+def describe_y_classify_by_cat_feat(mydf, x, y, title='', classify_content='survivors', labels=['Death', 'Survived']):
+    """
+    Generate one barplot with quantity and len(x.unique()) pie plots with percentage of x by class of y.unique()
+    @classify_content : string that is the meaning of y
+    @labels : start from 0, is the meanign of y value
+    """
+    # Create DataSet
+    df1 = df.groupby([x,y]).count().reset_index()
+    a_column = df1.columns[2]
+    df1 = df1.rename({a_column: "quantity"}, axis=1)
+    alist = df1['quantity'].tolist()
+    unique_values_x = mydf[x].unique().tolist()
+    unique_values_x.sort()
+    len_unique_values_y = len(mydf[y].unique().tolist())
+    # Create Fig and Axes
+    f, ax = plt.subplots(ncols=len(unique_values_x)+1, figsize=(18, 5), sharex=False)
+    f.suptitle(title, fontsize=18)
+    # BarPlot
+    s = sns.barplot(x=x, y='quantity', hue=y, data=df1, ax=ax[0])
+    count, by_hue = 0, 0
+    for index, row in df1.iterrows():
+        axis_x = count - 0.20 if index % 2 == 0 else count + 0.20
+        by_hue += 1
+        if(by_hue == len_unique_values_y):
+            count += 1
+            by_hue = 0
+            # print(axis_x) ## DEBUG
+        s.text(axis_x, row['quantity'], '{:,d}'.format(int(row['quantity'])), color='black', ha="center")
+    # Query DF
+    hue_count = 0
+    for i in range(len(unique_values_x)):
+        df1.query('{} == "{}"'.format(x, unique_values_x[i])).plot.pie(y='quantity', figsize=(18, 5), autopct='%1.2f%%',
+                                    labels = ['{} = {}'.format(labels[0], str(alist[i+hue_count])),
+                                              '{} = {}'.format(labels[1], str(alist[i+hue_count+1]))],
+                                    title='{} {} {} (Total = {})'.format(x, unique_values_x[i], classify_content ,str(alist[i] + alist[i+1])),
+                                    ax=ax[i+1], labeldistance=None)
+        hue_count += 1
+    plt.show()
+    # return df1 ## DEBUG
+    
+# describe_y_classify_by_cat_feat(df, x='embarked', y='survived', title='survived by sex')
 ```
 
+![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/describe_y_classify_by_cat_feat.png)
 
+## Describe Target Y by NumericFeat
 
-![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/boxplot-by-class.png)
+```python
+def describe_y_classify_numeric_feature(mydf, x, y, title='', with_swarmp=False):
+    f, (ax1, ax2, ax3) = plt.subplots(ncols=3, figsize=(18, 5), sharex=False)
+    # Box and Violin Plots
+    sns.boxplot(y=x, x=y, data=mydf, ax=ax1)
+    sns.violinplot(y=x, x=y, data=mydf, ax=ax2)
+    if(with_swarmp):
+        sns.swarmplot(x=y, y=x, data=mydf, ax=ax2, palette='rocket')
+    # HistogramPlot
+    y_unique_values = mydf[y].unique().tolist()
+    for u in y_unique_values:
+        adf = mydf.query("{} == {}".format(y, u))
+        sns.distplot(adf[x], ax=ax3)
+    # Set Titles
+    if(not title):
+        f.suptitle('{} by {}'.format(y,x), fontsize=18)
+    else:
+        f.suptitle(title, fontsize=18)
+    ax1.set_title("BoxPlot")
+    ax2.set_title("ViolinPlot")
+    ax3.set_title("HistogramPlot")
+    plt.show()
+    
+# describe_y_classify_numeric_feature(df, x='fare', y='survived')
+```
+
+![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/describe_y_classify_numeric_feature.png)
 
 ## Curva ROC vários Modelos
 
@@ -734,7 +825,11 @@ def plot_top_bottom_rank_correlation(my_df, column_target, top_rank=5):
 ### Test Normality: Skewness and Kutoise
 
 ```python
-def test_normal_distribution(serie, series_name='series', thershold=0.4):
+from scipy.stats import norm
+from scipy import stats
+
+def test_normal_distribution(serie, thershold=0.4):
+    series_name = serie.name
     f, (ax1, ax2) = plt.subplots(ncols=2, figsize=(18, 6), sharex=False)
     f.suptitle('{} is a Normal Distribution?'.format(series_name), fontsize=18)
     ax1.set_title("Histogram to " + series_name)
@@ -799,38 +894,11 @@ def test_normal_distribution(serie, series_name='series', thershold=0.4):
             loc='best')
     ax1.set_ylabel('Frequency')
     # ax2 = qq-plot
-    stats.probplot(df_train['SalePrice'], plot=ax2)
+    stats.probplot(serie, plot=ax2)
     plt.show()
 ```
 
 ![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/test_normal_distribution.png)
-
-# OUTILIERS
-
-Usando IQR retira as linhas que são outiliers de uma coluna. útil para fazer EDA se tiver muitos ouitliers
-
-```python
-def df_remove_outiliers_from_a_serie(mydf, series_name):
-    # Use IQR Strategy
-    # https://machinelearningmastery.com/how-to-use-statistics-to-identify-outliers-in-data/
-    # def quantils
-    series = mydf[series_name]
-    q25, q75 = series.quantile(0.25), series.quantile(0.75)
-    iqr = q75 - q25
-    print('Percentiles: 25th=%.3f, 75th=%.3f, IQR=%.3f' % (q25, q75, iqr))
-    cut_off = iqr * 1.5
-    lower, upper = q25 - cut_off, q75 + cut_off
-    # identify outliers
-    print('Cut Off: below than', lower, 'and above than', upper)
-    outliers = series[ (series > upper) | (series < lower)]
-    print('Identified outliers: {:,d}'.format(len(outliers)), 'that are',
-          '{:.2%}'.format(len(outliers)/len(series)), 'of total data')
-    # remove outliers
-    outliers_removed = [x for x in series if x >= lower and x <= upper]
-    print('Non-outlier observations: {:,d}'.format(len(outliers_removed)))
-    mydf = mydf[ (mydf[series_name] <= upper) & (mydf[series_name] >= lower) ]
-    return mydf
-```
 
 
 
@@ -858,7 +926,7 @@ def df_rating_missing_data(my_df):
 
 ![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/df_rating_missing_data.png)
 
-# EVALUATE MODELS
+# REGRESSION
 
 ## Plot pointPlot Regression scores
 
@@ -884,6 +952,23 @@ plot_model_score_regression(list(scores.keys()), [score for score, _ in scores.v
 
 ![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/plot_model_score_regression.png)
 
+### SHow final scores model
+
+```python
+from sklearn.metrics import mean_absolute_error, mean_squared_error, mean_squared_log_error, r2_score
+
+def evaluate_regression(y_pred, y_test, title=''):
+    if(title):
+        print(title)
+    print('MAE  : {:14,.3f}'.format(mean_absolute_error(y_pred, y_test)))
+    print('MSE  : {:14,.3f}'.format(mean_squared_error(y_pred, y_test)))
+    print('RMSE : {:14,.3f}'.format(np.sqrt(mean_squared_error(y_pred, y_test))))
+    print('RMSLE: {:14,.3f}'.format(np.sqrt(mean_squared_log_error(np.absolute(y_pred), y_test))))
+    print('R2   : {:14,.3f}'.format(r2_score(y_pred, y_test)))
+```
+
+
+
 # EDA
 
 ## EDA Describe X by Y
@@ -904,7 +989,7 @@ def describe_y_numeric_by_x_cat_boxplot(dtf, x_feat, y_target, title='', figsize
 
 ![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/describe_y_by_x_cat_boxplot.png)
 
-# NLP, nlp
+# NLP
 
 ## Words Distribution
 
@@ -984,4 +1069,68 @@ def plot_ngrams_words(series_words, title='Top 10 words'):
 ```
 
 ![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/ngrams_plot.png)
+
+tree
+
+## Memory Usage
+
+```python
+def reduce_memory_usage(df):
+    """ The function will reduce memory of dataframe
+    Note: Apply this function after removing missing value"""
+    intial_memory = df.memory_usage().sum()/1024**2
+    print('Intial memory usage:',intial_memory,'MB')
+    for col in df.columns:
+        mn = df[col].min()
+        mx = df[col].max()
+        if df[col].dtype != object:            
+            if df[col].dtype == int:
+                if mn >=0:
+                    if mx < np.iinfo(np.uint8).max:
+                        df[col] = df[col].astype(np.uint8)
+                    elif mx < np.iinfo(np.uint16).max:
+                        df[col] = df[col].astype(np.uint16)
+                    elif mx < np.iinfo(np.uint32).max:
+                        df[col] = df[col].astype(np.uint32)
+                    elif mx < np.iinfo(np.uint64).max:
+                        df[col] = df[col].astype(np.uint64)
+                else:
+                    if mn > np.iinfo(np.int8).min and mx < np.iinfo(np.int8).max:
+                        df[col] = df[col].astype(np.int8)
+                    elif mn > np.iinfo(np.int16).min and mx < np.iinfo(np.int16).max:
+                        df[col] = df[col].astype(np.int16)
+                    elif mn > np.iinfo(np.int32).min and mx < np.iinfo(np.int32).max:
+                        df[col] = df[col].astype(np.int32)
+                    elif mn > np.iinfo(np.int64).min and mx < np.iinfo(np.int64).max:
+                        df[col] = df[col].astype(np.int64)
+            if df[col].dtype == float:
+                df[col] =df[col].astype(np.float32)
+    
+    red_memory = df.memory_usage().sum()/1024**2
+    print('Memory usage after complition: ',red_memory,'MB')
+
+# reduce_memory_usage(df)
+```
+
+## RANDOM
+
+### Describe Horizontal
+
+````
+def describe_horizontal_serie(serie):
+    adec = serie.describe()
+    adtype = serie.dtype
+    adf = pd.DataFrame(data=adec.values).T
+    adf.columns = adec.index
+    adf.index = pd.Index([adec.name])
+    if(adtype in ['int64']):
+        alist = ['min', '25%', '50%', '75%', 'max']
+        for c in alist:
+            adf[c] = adf[c].astype('int64')
+            adf[c] = adf[c].map(lambda x: "{:,d}".format(int(x)))
+    adf['count'] = adf['count'].map(lambda x: "{:,d}".format(int(x)))
+    return adf
+````
+
+![](/home/rhavel/Documentos/Personal Projects/ds-portifolio/ds/plots/imgs/describe_horizontal.png)
 

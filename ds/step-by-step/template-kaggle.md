@@ -31,6 +31,8 @@ Kaggle Kernel made by 🚀 <a href="https://www.kaggle.com/rafanthx13"> Rafael M
 
 ````
 \## Table Of Content (TOC) <a id="top"></a>
+
+\## Import Libs and DataSet
 ````
 
 =======================================================================
@@ -39,6 +41,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import random
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -54,10 +57,18 @@ sns.set(style="whitegrid")
 plt.style.use('seaborn')
 seed = 42
 np.random.seed(seed)
+random.seed(seed)
 
 ========================================================================
 
-sns.set_palette("Set3") # default seabon: deep || default matplotlib: tab10 || Set1, Set2, Set3, Paired, muted, Accent, Spectral, CMRmap # https://medium.com/@morganjonesartist/color-guide-to-seaborn-palettes-da849406d44f
+
+sns.set_palette("Set3") 
+\# default seabon: deep || default matplotlib: tab10 || Set1, Set2, Set3, Paired, muted, Accent, Spectral, CMRmap # https://medium.com/@morganjonesartist/color-guide-to-seaborn-palettes-da849406d44f
+
+
+sns.set(style="whitegrid")
+\# https://python-graph-gallery.com/104-seaborn-themes/
+\# Ohters Themes: darkgrid, whitegrid, dark, white, and ticks
 
 ========================================================================
 
@@ -162,6 +173,10 @@ MEDICAL COST
 + [Evaluate Best Model to Regression](#index20)
 + [Conclusion](#index25)
 
++ [Import Libs and DataSet](#index01) 
++ [Snippets](#index02)
++ [Undestand DataSet](#index03)
+
 ----
 
 Target by Feaute
@@ -245,6 +260,48 @@ df['new_message'] = df['new_message'].apply(lambda x: lematizer(x))
   - [Super Leaner](#index17)
 + [Submission](#index18)
 + [Conclusion](#index19)
+
+
+
+
++ [Clean and Restructure DataSet](#index03)
++ [EDA: Exploration Data Analysis](#index04)
+  - [Entity](#index05)
+  - [Year](#index06)
++ [EDA with Choropleth Maps](#index07)
+  - [Prepare GeoJSON](#index08)
+  - [Emission in last Year 2017](#index10)
+  - [Europe](#index11)
+  - [Africa](#index12)
+  - [South America](#index13)
+  - [Asia](#index14)
+  - [North America](#index15)
+  - [World and Continents](#index16)
+  - [Big Countries](#index17)
+
++ [Import Libs and DataSet](#index01) 
++ [Snippets](#index02)
++ [Restrucutre DataSet](#index03)
+  - [Rename and Convert Columns](#index04)
+  - [Handle Missing Data](#index05)
++ [Analysis Columns](#index06)
+  - [region](#index07)
+  - [n_gas_stations](#index08)
+  - [fuel](#index09)
+  - [year](#index10)
++ [Prepare Choropleth map](#index11)
++ [EDA over last record ...](#index12)
+  - [Price of `avg_price` on `'ÓLEO DIESEL S10'` by state](#index13)
+  - [Price of `avg_price` on `GASOLINA COMUM` (Gas) by state](#index14)
+  - [Price of `dist_avg_price` on `GASOLINA COMUM` by state](#index15)
+  - [Price of `dist_avg_price` on `ÓLEO DIESEL` by state](#index16)
++ [Quetion: What is state with largest number of gas stations?](#index20)
++ [Question: Which state has max and min price of gas (GASOLINA COMUM)](#index22)
++ [Question: Which region is most expensive?](#index23)
++ [Question: In-depth analysis of gas prices in the regions](#index24)
++ [Conclusion on gasoline price growth in states and regions](#index25)
+
+
 
 <a id="top"></a>
 

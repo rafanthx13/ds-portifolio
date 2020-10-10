@@ -186,18 +186,18 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, mean_square
 def evaluate_regression(y_pred, y_test, title=''):
     if(title):
         print(title)
-    print('MAE : {:14,.3f}'.format(mean_absolute_error(y_pred, y_test)))
-    print('MSE : {:14,.3f}'.format(mean_squared_error(y_pred, y_test)))
-    print('RMSE: {:14,.3f}'.format(np.sqrt(mean_squared_error(y_pred, y_test))))
-    print('R2  : {:14,.3f}'.format(r2_score(y_pred, y_test)))
+    print('MAE  : {:14,.3f}'.format(mean_absolute_error(y_pred, y_test)))
+    print('MSE  : {:14,.3f}'.format(mean_squared_error(y_pred, y_test)))
+    print('RMSE : {:14,.3f}'.format(np.sqrt(mean_squared_error(y_pred, y_test))))
+    print('RMSLE: {:14,.3f}'.format(np.sqrt(mean_squared_log_error(np.absolute(y_pred), y_test))))
+    print('R2   : {:14,.3f}'.format(r2_score(y_pred, y_test)))
+    
+###########
 
-# evaluate_regression(y_pred, y_test, 'Cat Regressor:')
-"""
-Cat Regressor:
-MAE :          1.740
-MSE :          4.875
-RMSE:          2.208
-R2  :          0.099
-"""
+final_model = 'XGBoost'
+
+y_final_pred = regressor_models[final_model].predict(x_test)
+
+evaluate_regression(y_final_pred, y_test, final_model)
 ```
 
