@@ -20,7 +20,7 @@ df1.drop( df1[df1['entity'].isin(['France'])].index, axis=0)
 + Lidar com missing values
 + converter tipos das columnas para os tipos corretos (o tipo object é para string, se nao for string e tiver isso, muda agora
 
-## DUplicate
+## Duplicate
 
 df.duplicated().sum()
 

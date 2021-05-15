@@ -83,6 +83,8 @@ def df_value_counts(df0):
 # df_value_counts(df)
 ```
 
+Show Many Unique values
+
 ## Describe Transposte
 
 ```python
@@ -94,6 +96,12 @@ def generate_columns_from_index(topnum):
 
 def eda_categ_feat_T_rankend(series, top_num):
     return eda_categ_feat_desc_df(series).head(top_num).T.rename(generate_columns_from_index(top_num),axis='columns')
+```
+
+## Summary df
+
+```python
+
 ```
 
 
@@ -157,7 +165,7 @@ def eda_categ_feat_desc_plot(series_categorical, title = "", fix_labels=False):
         val_concat = val_concat.sort_values(series_name).reset_index()
     
     for index, row in val_concat.iterrows():
-        s.text(row.name, row['quantity'], '{:,d}'.format(row['quantity']), color='black', ha="center")
+        s.text(row.name, row['quantity'], '{:,d}'.format(int(row['quantity'])), color='black', ha="center")
 
     s2 = val_concat.plot.pie(y='percentage', autopct=lambda value: '{:.2f}%'.format(value),
                              labels=val_concat[series_name].tolist(), legend=None, ax=ax[1],
@@ -495,6 +503,53 @@ def df_remove_outiliers_from_a_serie(mydf, series_name):
     mydf = mydf[ (mydf[series_name] <= upper) & (mydf[series_name] >= lower) ]
     return mydf
 ```
+
+## Find Outiliers
+
+```python
+def find_outiliers_from_series(df_num): 
+    """"must be float64 dtype"""
+    
+    # calculating mean and std of the array
+    data_mean, data_std = np.mean(df_num), np.std(df_num)
+
+    # seting the cut line to both higher and lower values
+    # You can change this value
+    cut = data_std * 3
+
+    #Calculating the higher and lower cut values
+    lower, upper = data_mean - cut, data_mean + cut
+
+    # creating an array of lower, higher and total outlier values 
+    outliers_lower = [x for x in df_num if x < lower]
+    outliers_higher = [x for x in df_num if x > upper]
+    outliers_total = [x for x in df_num if x < lower or x > upper]
+
+    # array without outlier values
+    outliers_removed = [x for x in df_num if x > lower and x < upper]
+    
+    print('OUTILIERS:\nmean: {:.4f} | std: {:.4f} |\nlower_cutter: {:.4f} | upper_cutter: {:.4f}'.format(data_mean, data_std, lower, upper))
+    print('Identified lowest outliers: %d' % len(outliers_lower)) # printing total number of values in lower cut of outliers
+    print('Identified upper outliers: %d' % len(outliers_higher)) # printing total number of values in higher cut of outliers
+    print('Total outlier observations: %d' % len(outliers_total)) # printing total number of values outliers of both sides
+    print('Non-outlier observations: %d' % len(outliers_removed)) # printing total number of non outlier values
+    # Percentual of outliers in points
+    print("Total percentual of Outliers: {:.2%}".format( len(outliers_total) / len(outliers_removed) ) ) 
+    
+```
+
+```
+OUTILIERS:
+mean: 135.0273 | std: 239.1572 |
+lower_cutter: -582.4444 | upper_cutter: 852.4991
+Identified lowest outliers: 0
+Identified upper outliers: 10097
+Total outlier observations: 10097
+Non-outlier observations: 580443
+Total percentual of Outliers: 1.74%
+```
+
+
 
 # NUMERICAL FEAT
 
@@ -1075,41 +1130,35 @@ tree
 ## Memory Usage
 
 ```python
-def reduce_memory_usage(df):
-    """ The function will reduce memory of dataframe
-    Note: Apply this function after removing missing value"""
-    intial_memory = df.memory_usage().sum()/1024**2
-    print('Intial memory usage:',intial_memory,'MB')
+def reduce_mem_usage(df, verbose=True):
+    numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
+    start_mem = df.memory_usage().sum() / 1024**2    
     for col in df.columns:
-        mn = df[col].min()
-        mx = df[col].max()
-        if df[col].dtype != object:            
-            if df[col].dtype == int:
-                if mn >=0:
-                    if mx < np.iinfo(np.uint8).max:
-                        df[col] = df[col].astype(np.uint8)
-                    elif mx < np.iinfo(np.uint16).max:
-                        df[col] = df[col].astype(np.uint16)
-                    elif mx < np.iinfo(np.uint32).max:
-                        df[col] = df[col].astype(np.uint32)
-                    elif mx < np.iinfo(np.uint64).max:
-                        df[col] = df[col].astype(np.uint64)
+        col_type = df[col].dtypes
+        if col_type in numerics:
+            c_min = df[col].min()
+            c_max = df[col].max()
+            if str(col_type)[:3] == 'int':
+                if c_min > np.iinfo(np.int8).min and c_max < np.iinfo(np.int8).max:
+                    df[col] = df[col].astype(np.int8)
+                elif c_min > np.iinfo(np.int16).min and c_max < np.iinfo(np.int16).max:
+                    df[col] = df[col].astype(np.int16)
+                elif c_min > np.iinfo(np.int32).min and c_max < np.iinfo(np.int32).max:
+                    df[col] = df[col].astype(np.int32)
+                elif c_min > np.iinfo(np.int64).min and c_max < np.iinfo(np.int64).max:
+                    df[col] = df[col].astype(np.int64)  
+            else:
+                if c_min > np.finfo(np.float16).min and c_max < np.finfo(np.float16).max:
+                    df[col] = df[col].astype(np.float16)
+                elif c_min > np.finfo(np.float32).min and c_max < np.finfo(np.float32).max:
+                    df[col] = df[col].astype(np.float32)
                 else:
-                    if mn > np.iinfo(np.int8).min and mx < np.iinfo(np.int8).max:
-                        df[col] = df[col].astype(np.int8)
-                    elif mn > np.iinfo(np.int16).min and mx < np.iinfo(np.int16).max:
-                        df[col] = df[col].astype(np.int16)
-                    elif mn > np.iinfo(np.int32).min and mx < np.iinfo(np.int32).max:
-                        df[col] = df[col].astype(np.int32)
-                    elif mn > np.iinfo(np.int64).min and mx < np.iinfo(np.int64).max:
-                        df[col] = df[col].astype(np.int64)
-            if df[col].dtype == float:
-                df[col] =df[col].astype(np.float32)
-    
-    red_memory = df.memory_usage().sum()/1024**2
-    print('Memory usage after complition: ',red_memory,'MB')
-
-# reduce_memory_usage(df)
+                    df[col] = df[col].astype(np.float64)    
+    end_mem = df.memory_usage().sum() / 1024**2
+    if verbose: print('Mem. usage decreased of {:5.2f} Mb to {:5.2f} Mb ({:.1f}% reduction)'.format(
+        start_mem, end_mem, 100 * (start_mem - end_mem) / start_mem))
+    return df
+# df = reduce_memory_usage(df)
 ```
 
 ## RANDOM
